@@ -1,0 +1,64 @@
+{
+    "store": "My Awesome Store",
+    "location": "123 Shopping Street, Cityville",
+    "inventory": [
+      {
+        "product_id": "001",
+        "name": "Smartphone",
+        "description": "High-end smartphone with amazing features.",
+        "price": 699.99,
+        "quantity": 50,
+        "reviews": [
+          {
+            "user": "Customer1",
+            "rating": 4,
+            "comment": "Great phone, but a bit pricey."
+          },
+          {
+            "user": "Customer2",
+            "rating": 5,
+            "comment": "Absolutely love it!"
+          }
+        ]
+      },
+      {
+        "product_id": "002",
+        "name": "Laptop",
+        "description": "Powerful laptop for work and play.",
+        "price": 1099.99,
+        "quantity": 25,
+        "reviews": []
+      }
+    ],
+    "orders": [
+      {
+        "order_id": "1001",
+        "customer_name": "CustomerA",
+        "items": [
+          {
+            "product_id": "001",
+            "quantity": 2
+          }
+        ],
+        "total_price": 1399.98,
+        "order_date": "2023-01-15"
+      },
+      {
+        "order_id": "1002",
+        "customer_name": "CustomerB",
+        "items": [
+          {
+            "product_id": "001",
+            "quantity": 1
+          },
+          {
+            "product_id": "002",
+            "quantity": 1
+          }
+        ],
+        "total_price": 1799.98,
+        "order_date": "2023-01-16"
+      }
+    ]
+  }
+  

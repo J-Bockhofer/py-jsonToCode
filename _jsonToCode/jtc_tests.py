@@ -1,6 +1,6 @@
 import unittest
 from templating.codeblock import CodeBlock
-from pyserde_core import decode_layer, json_to_code, dict_to_code
+from jtc_core import decode_layer, json_to_code, dict_to_code
 
 import os
 import json
@@ -208,42 +208,6 @@ class L_0:
 
         self.maxDiff = None
         self.assertEqual(fulltxt, expected)
-
-    def test_full_de_and_encode(self):
-
-        with open('/home/pi/projects/pyserde/_pyserde/testres/testjson_3.json', "r", encoding='utf-8-sig') as data_file:
-            data = json.load(data_file)
-
-        code = dict_to_code(data,'/home/pi/projects/pyserde/_pyserde/testres/testout_test.py')
-
-        foocode = open("/home/pi/projects/pyserde/_pyserde/testres/testout_test.py")
-        foo = importCode(code, "*", 1)
-
-        #exec(code)
-
-        dynamic_root = foo.L_0.from_dict(data)
-        data_b = dynamic_root.to_dict()
-
-        #print("sicktest")
-        self.maxDiff = None
-        self.assertEqual(data, data_b)
-    
-def importCode(code, name, add_to_sys_modules=0):
-    """ code can be any object containing code -- string, file object, or
-       compiled code object. Returns a new module object initialized
-       by dynamically importing the given code and optionally adds it
-       to sys.modules under the given name.
-    """
-    import imp
-    module = imp.new_module(name)
-
-    if add_to_sys_modules:
-        import sys
-        sys.modules[name] = module
-    exec(code) in module.__dict__
-
-    return module
-
 
 if __name__ == '__main__':
     unittest.main()

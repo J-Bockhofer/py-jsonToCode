@@ -1,12 +1,9 @@
 from templating.codeblock import CodeBlock
-from templating.filewriter import generate_file
 
 import json
 import os
 
 def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBlock]:
-    fieldnames = data.keys()
-    values = data.values()
     
     if classname == '':
         classname += f'L_{layerdepth}'
@@ -64,11 +61,9 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                         nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                         codeblocks += nthclassblocklist
                         addlisttype = f'[{classstr}]'
-
-
                         
-
                 elementtypelist.append(elementtype)
+
             typeset = set(elementtypelist)
 
             if len(typeset) == 1:
@@ -91,9 +86,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                     typestr += f'[{elementtype.__name__}]'
                     todict_body_str = f'"{key}": self.{key}, '
 
-                    # gets tricky here
-
-            
+            # gets tricky here, heterogenous list -> unsolved
 
         # if theres a dict decode that dict with layerdepth + 1
         if valtype == type({}):
@@ -110,7 +103,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
         initblock.append(blockstr)
 
         from_dict_body_if += f'"{key}" in data and '
-        #                                  ^12345^ 
+        #                                    ^12345^ 
         # delete these 5 chars after last iteration
         from_dict_body_ifbody_returnstr += from_dict_body_ifbody_returnstr_tmp
 
@@ -134,7 +127,6 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
     codeblocks.append(classcodeblock)
     return codeblocks
 
-
 def dict_to_code(data:dict, filename:str) -> str:
     result = decode_layer(data)
     fulltxt = ''
@@ -153,6 +145,38 @@ def json_to_code(jsonfilename:str, codefilename:str) -> str:
     code = dict_to_code(data, codefilename)
     return code
 
+def generate_test(jsonfilename:str, codefilename:str):
+    # take code, generate test
+    #os.path.dirname(os.path.abspath())
+    path, file = os.path.split(os.path.abspath(codefilename))
+    module = file.split('.')[0]
+    testfile = path+'/test_'+file
+    importhead = f'''\
+import unittest
+import json
+from {module} import *
+
+'''
+    testcodehead = 'class TestSerializer(unittest.TestCase)'
+    testfunchead = 'def test_serializer(self)'
+    testopenhead = f'with open("{jsonfilename}", "r", encoding="utf-8-sig") as data_file'
+    testopenbody = 'data = json.load(data_file)' 
+    testopencode = CodeBlock(testopenhead, [testopenbody])
+    testfuncbody = [testopencode,
+                    'root = L_0.from_dict(data)',
+                    'data_b = root.to_dict()',
+                    'self.maxDiff = None',
+                    'self.assertEqual(data, data_b)']
+    
+    testfunccode = CodeBlock(testfunchead, testfuncbody)
+
+    testcode = CodeBlock(testcodehead, [testfunccode])
+
+    dundermain = CodeBlock('if __name__ == "__main__"',['unittest.main()'])
+
+    with open(testfile, 'w') as f:
+        f.write(importhead + testcode.__str__() + dundermain.__str__())
+    
 def rename_classes(codefile:str):
     if os.path.exists(codefile):
         with open(codefile, "w") as data_file:

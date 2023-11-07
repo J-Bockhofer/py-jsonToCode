@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# scribble files
+_jsonToCode/manualTest.py
+_jsonToCode/scribbels.py
+
 # C extensions
 *.so
 
