@@ -1,0 +1,27 @@
+{
+    "user": {
+      "name": "John Doe",
+      "age": 30,
+      "email": "john.doe@example.com",
+      "address": {
+        "street": "123 Main St",
+        "city": "Sampleville",
+        "state": "CA"
+      },
+      "hobbies": ["reading", "hiking", "cooking"],
+      "is_active": true
+    },
+    "products": [
+      {
+        "id": 1,
+        "name": "Widget A",
+        "price": 19.99
+      },
+      {
+        "id": 2,
+        "name": "Gadget B",
+        "price": 29.99
+      }
+    ],
+    "timestamp": "2023-11-07T12:34:56Z"
+  }

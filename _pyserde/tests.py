@@ -1,7 +1,9 @@
 import unittest
 from templating.codeblock import CodeBlock
-from pyserde_core import decode_layer
+from pyserde_core import decode_layer, json_to_code, dict_to_code
 
+import os
+import json
 
 class TestTemplating(unittest.TestCase):
 
@@ -19,6 +21,7 @@ def print_success(x):
 
         self.assertEqual(block.__str__(), res)
 
+
     def test_decode_layer_1(self):
         sampleDict = {'L1_Key1':'Object1', 
         'L1_Key2':[1,2,3,4], 
@@ -35,8 +38,14 @@ class L_0:
         self.L1_Key3 = L1_Key3
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data:
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"])
+        else:
+            raise KeyError("Invalid data for L_0")
 '''
-
+        self.maxDiff = None
         self.assertEqual(result[-1].__str__(), expected)
 
     def test_decode_layer_2(self):
@@ -59,6 +68,13 @@ class L_0:
         self.L1_Key5 = L1_Key5
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = data["L1_Key5"]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
 '''
         self.maxDiff = None
         self.assertEqual(result[-1].__str__(), expected)
@@ -80,18 +96,36 @@ class L_0_3:
         self.L2_Key2 = L2_Key2
     def to_dict(self)->dict:
         return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L2_Key1" in data and "L2_Key2" in data:
+            return cls(data["L2_Key1"], data["L2_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_3")
 class L_0_4_1:
     def __init__(self, L3_Key1:str, L3_Key2:list[int]):
         self.L3_Key1 = L3_Key1
         self.L3_Key2 = L3_Key2
     def to_dict(self)->dict:
         return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L3_Key1" in data and "L3_Key2" in data:
+            return cls(data["L3_Key1"], data["L3_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_1")
 class L_0_4_2:
     def __init__(self, L4_Key1:str, L4_Key2:list[int]):
         self.L4_Key1 = L4_Key1
         self.L4_Key2 = L4_Key2
     def to_dict(self)->dict:
         return {{"L4_Key1": self.L4_Key1, "L4_Key2": self.L4_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L4_Key1" in data and "L4_Key2" in data:
+            return cls(data["L4_Key1"], data["L4_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_2")
 class L_0:
     def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict]):
         self.L1_Key1 = L1_Key1
@@ -101,6 +135,13 @@ class L_0:
         self.L1_Key5 = L1_Key5
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = data["L1_Key5"]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
 '''
         fulltxt = ''
         for res in result:
@@ -126,12 +167,24 @@ class L_0_3:
         self.L2_Key2 = L2_Key2
     def to_dict(self)->dict:
         return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L2_Key1" in data and "L2_Key2" in data:
+            return cls(data["L2_Key1"], data["L2_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_3")
 class L_0_4_1:
     def __init__(self, L3_Key1:str, L3_Key2:list[int]):
         self.L3_Key1 = L3_Key1
         self.L3_Key2 = L3_Key2
     def to_dict(self)->dict:
         return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L3_Key1" in data and "L3_Key2" in data:
+            return cls(data["L3_Key1"], data["L3_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_1")
 class L_0:
     def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1]):
         self.L1_Key1 = L1_Key1
@@ -141,6 +194,13 @@ class L_0:
         self.L1_Key5 = L1_Key5
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = [L_0_4_1.from_dict(classdata) for classdata in data.get("L1_Key5", [])]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
 '''
         fulltxt = ''
         for res in result:
@@ -148,6 +208,42 @@ class L_0:
 
         self.maxDiff = None
         self.assertEqual(fulltxt, expected)
+
+    def test_full_de_and_encode(self):
+
+        with open('/home/pi/projects/pyserde/_pyserde/testres/testjson_3.json', "r", encoding='utf-8-sig') as data_file:
+            data = json.load(data_file)
+
+        code = dict_to_code(data,'/home/pi/projects/pyserde/_pyserde/testres/testout_test.py')
+
+        foocode = open("/home/pi/projects/pyserde/_pyserde/testres/testout_test.py")
+        foo = importCode(code, "*", 1)
+
+        #exec(code)
+
+        dynamic_root = foo.L_0.from_dict(data)
+        data_b = dynamic_root.to_dict()
+
+        #print("sicktest")
+        self.maxDiff = None
+        self.assertEqual(data, data_b)
+    
+def importCode(code, name, add_to_sys_modules=0):
+    """ code can be any object containing code -- string, file object, or
+       compiled code object. Returns a new module object initialized
+       by dynamically importing the given code and optionally adds it
+       to sys.modules under the given name.
+    """
+    import imp
+    module = imp.new_module(name)
+
+    if add_to_sys_modules:
+        import sys
+        sys.modules[name] = module
+    exec(code) in module.__dict__
+
+    return module
+
 
 if __name__ == '__main__':
     unittest.main()
