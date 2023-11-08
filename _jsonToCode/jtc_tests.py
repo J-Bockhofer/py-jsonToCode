@@ -21,7 +21,6 @@ def print_success(x):
 
         self.assertEqual(block.__str__(), res)
 
-
     def test_decode_layer_1(self):
         sampleDict = {'L1_Key1':'Object1', 
         'L1_Key2':[1,2,3,4], 
@@ -208,6 +207,10 @@ class L_0:
 
         self.maxDiff = None
         self.assertEqual(fulltxt, expected)
+
+    def test_find_classes(self):
+        pass
+      
 
 if __name__ == '__main__':
     unittest.main()

@@ -3,8 +3,16 @@ from templating.codeblock import CodeBlock
 import json
 import os
 
+import re
+
 def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBlock]:
-    
+    """
+        Function decodes the current dictionary, recursively decodes any contained dictionaries \n
+        Generates code for classes with \n
+        __init__() \n
+        to_dict() \n
+        from_dict() \n
+    """
     if classname == '':
         classname += f'L_{layerdepth}'
 
@@ -137,17 +145,19 @@ def dict_to_code(data:dict, filename:str) -> str:
             f.write(fulltxt)
     return fulltxt
 
-def json_to_code(jsonfilename:str, codefilename:str) -> str:
+def json_to_code(jsonfilename:str, codefilename:str, encoding:str='utf-8-sig') -> str:
     if os.path.exists(jsonfilename):
-        with open(jsonfilename, "r", encoding='utf-8-sig') as data_file:
+        with open(jsonfilename, "r", encoding=encoding) as data_file:
             data = json.load(data_file)  
 
     code = dict_to_code(data, codefilename)
     return code
 
-def generate_test(jsonfilename:str, codefilename:str):
-    # take code, generate test
-    #os.path.dirname(os.path.abspath())
+def generate_test(jsonfilename:str, codefilename:str, encoding:str='utf-8-sig') -> str:
+    """
+        takes code and json to generate a test \n
+        tests equality of input json and serialized class.to_dict() output
+    """
     path, file = os.path.split(os.path.abspath(codefilename))
     module = file.split('.')[0]
     testfile = path+'/test_'+file
@@ -159,7 +169,7 @@ from {module} import *
 '''
     testcodehead = 'class TestSerializer(unittest.TestCase)'
     testfunchead = 'def test_serializer(self)'
-    testopenhead = f'with open("{jsonfilename}", "r", encoding="utf-8-sig") as data_file'
+    testopenhead = f'with open("{jsonfilename}", "r", encoding={encoding}) as data_file'
     testopenbody = 'data = json.load(data_file)' 
     testopencode = CodeBlock(testopenhead, [testopenbody])
     testfuncbody = [testopencode,
@@ -174,13 +184,46 @@ from {module} import *
 
     dundermain = CodeBlock('if __name__ == "__main__"',['unittest.main()'])
 
+    fulltxt = importhead + testcode.__str__() + dundermain.__str__()
+
     with open(testfile, 'w') as f:
-        f.write(importhead + testcode.__str__() + dundermain.__str__())
+        f.write(fulltxt)    
+    return fulltxt, testfile
     
-def rename_classes(codefile:str):
-    if os.path.exists(codefile):
-        with open(codefile, "w") as data_file:
-            lines = data_file.readlines()
+def rename_class(prevName:str, newName:str, text:str) ->str:
+    text = text.replace(prevName, newName)
+    return text
+
+def write_to_file(text:str, file:str):
+    with open(file, 'w') as f:
+        f.write(text)
+
+def text_from_file(file:str) -> str:
+    with open(file, 'r') as f:
+       text = f.read()
+    return text
+
+def find_classes(text:str) -> list[str]:
+    class_names = re.findall(r'.*class (.+):', text)
+    class_names.sort()
+    return class_names
+
+def find_inits_for_classes(text:str, class_names:list[str]) ->list[str]:
+    inits = []
+    for name in class_names:
+        init = re.findall(r'.*class '+re.escape(name)+r':\n.*(def __init__\(.*\)):', text)[0]
+        inits.append(init)
+    return inits
+
+def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:
+    root_name = re.findall(r'.*root = (.+).from_dict', testcode)[0]
+    if oldname:
+        if oldname == root_name:
+            testcode = testcode.replace(root_name, newName)
+    else:
+        testcode = testcode.replace(root_name, newName)
+    return testcode
+
 
         # in lines find every class definition and its name
         # list properties
