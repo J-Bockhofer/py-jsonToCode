@@ -30,7 +30,7 @@ jtc.generate_test(jsonfile, codetofile)
 \
 Once generated, serialize a json by opening it \
 and calling the `.from_dict()` method of the main class \
-(default name: L_0)\
+(default name: L_0)
 
 ```python
     from testres.serializer_2 import *
