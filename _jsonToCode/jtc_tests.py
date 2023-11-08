@@ -1,6 +1,6 @@
 import unittest
 from templating.codeblock import CodeBlock
-from jtc_core import decode_layer, json_to_code, dict_to_code
+from jtc_core import decode_layer, json_to_code, dict_to_code, find_classes, find_inits_for_classes
 
 import os
 import json
@@ -209,8 +209,131 @@ class L_0:
         self.assertEqual(fulltxt, expected)
 
     def test_find_classes(self):
-        pass
-      
+        text = f'''\
+class L_0_3:
+    def __init__(self, L2_Key1:str, L2_Key2:list[int]):
+        self.L2_Key1 = L2_Key1
+        self.L2_Key2 = L2_Key2
+    def to_dict(self)->dict:
+        return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L2_Key1" in data and "L2_Key2" in data:
+            return cls(data["L2_Key1"], data["L2_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_3")
+class L_0_4_1:
+    def __init__(self, L3_Key1:str, L3_Key2:list[int]):
+        self.L3_Key1 = L3_Key1
+        self.L3_Key2 = L3_Key2
+    def to_dict(self)->dict:
+        return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L3_Key1" in data and "L3_Key2" in data:
+            return cls(data["L3_Key1"], data["L3_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_1")
+class L_0_4_2:
+    def __init__(self, L4_Key1:str, L4_Key2:list[int]):
+        self.L4_Key1 = L4_Key1
+        self.L4_Key2 = L4_Key2
+    def to_dict(self)->dict:
+        return {{"L4_Key1": self.L4_Key1, "L4_Key2": self.L4_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L4_Key1" in data and "L4_Key2" in data:
+            return cls(data["L4_Key1"], data["L4_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_2")
+class L_0:
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict]):
+        self.L1_Key1 = L1_Key1
+        self.L1_Key2 = L1_Key2
+        self.L1_Key3 = L1_Key3
+        self.L1_Key4 = L1_Key4
+        self.L1_Key5 = L1_Key5
+    def to_dict(self)->dict:
+        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = data["L1_Key5"]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
+'''        
+        classes = find_classes(text)
+        expected = ['L_0', 'L_0_3', 'L_0_4_1', 'L_0_4_2']
+
+        self.assertEqual(classes, expected)
+
+
+    def test_find_inits(self):
+        text = f'''\
+class L_0_3:
+    def __init__(self, L2_Key1:str, L2_Key2:list[int]):
+        self.L2_Key1 = L2_Key1
+        self.L2_Key2 = L2_Key2
+    def to_dict(self)->dict:
+        return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L2_Key1" in data and "L2_Key2" in data:
+            return cls(data["L2_Key1"], data["L2_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_3")
+class L_0_4_1:
+    def __init__(self, L3_Key1:str, L3_Key2:list[int]):
+        self.L3_Key1 = L3_Key1
+        self.L3_Key2 = L3_Key2
+    def to_dict(self)->dict:
+        return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L3_Key1" in data and "L3_Key2" in data:
+            return cls(data["L3_Key1"], data["L3_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_1")
+class L_0_4_2:
+    def __init__(self, L4_Key1:str, L4_Key2:list[int]):
+        self.L4_Key1 = L4_Key1
+        self.L4_Key2 = L4_Key2
+    def to_dict(self)->dict:
+        return {{"L4_Key1": self.L4_Key1, "L4_Key2": self.L4_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L4_Key1" in data and "L4_Key2" in data:
+            return cls(data["L4_Key1"], data["L4_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_2")
+class L_0:
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict]):
+        self.L1_Key1 = L1_Key1
+        self.L1_Key2 = L1_Key2
+        self.L1_Key3 = L1_Key3
+        self.L1_Key4 = L1_Key4
+        self.L1_Key5 = L1_Key5
+    def to_dict(self)->dict:
+        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = data["L1_Key5"]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
+'''        
+        classes = find_classes(text)
+        inits = find_inits_for_classes(text, classes)
+        expected = [
+            'def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict])', 
+            'def __init__(self, L2_Key1:str, L2_Key2:list[int])', 
+            'def __init__(self, L3_Key1:str, L3_Key2:list[int])', 
+            'def __init__(self, L4_Key1:str, L4_Key2:list[int])']
+        self.maxDiff = None
+        self.assertEqual(inits, expected)    
+
 
 if __name__ == '__main__':
     unittest.main()
