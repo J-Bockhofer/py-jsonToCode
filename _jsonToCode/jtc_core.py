@@ -30,6 +30,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
     from_dict_body_ifbody_returnstr = 'return cls('
     from_dict_body_else = 'else'
     from_dict_body_elsebody = 'raise KeyError("Invalid data for '
+    from_dict_body_elsebody_tmp = f'{classname}'
 
     keynum = 0
     inithead = f'def __init__(self'
@@ -40,7 +41,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
         typestr = valtype.__name__ 
         todict_body_str = f'"{key}": self.{key}, '
         from_dict_body_ifbody_returnstr_tmp = f'data["{key}"], '
-        from_dict_body_elsebody_tmp = f'{classname}'
+        
         # if its a list check what the element types are to make it typesafe 
         # and identify nexted dicts, need to check if dicts are same
         if valtype == type([]):
@@ -169,7 +170,7 @@ from {module} import *
 '''
     testcodehead = 'class TestSerializer(unittest.TestCase)'
     testfunchead = 'def test_serializer(self)'
-    testopenhead = f'with open("{jsonfilename}", "r", encoding={encoding}) as data_file'
+    testopenhead = f'with open("{jsonfilename}", "r", encoding="{encoding}") as data_file'
     testopenbody = 'data = json.load(data_file)' 
     testopencode = CodeBlock(testopenhead, [testopenbody])
     testfuncbody = [testopencode,
