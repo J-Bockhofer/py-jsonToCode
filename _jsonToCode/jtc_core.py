@@ -1,4 +1,5 @@
 from templating.codeblock import CodeBlock
+from templating.py_lang import py_keywords_conv
 
 import json
 import os
@@ -35,11 +36,11 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
     keynum = 0
     inithead = f'def __init__(self'
     for key in data:
-        
+        safe_key = to_safe_key(key)
         val = data[key]
         valtype = type(val)
         typestr = valtype.__name__ 
-        todict_body_str = f'"{key}": self.{key}, '
+        todict_body_str = f'"{key}": self.{safe_key}, '
         from_dict_body_ifbody_returnstr_tmp = f'data["{key}"], '
         
         # if its a list check what the element types are to make it typesafe 
@@ -69,7 +70,10 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                         uniquedicts += 1
                         nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                         codeblocks += nthclassblocklist
-                        addlisttype = f'[{classstr}]'
+                        if nthclassblocklist:
+                            addlisttype = f'[{classstr}]'
+                        else:
+                            addlisttype = f'[dict]'
                         
                 elementtypelist.append(elementtype)
 
@@ -89,11 +93,11 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                         typestr += f'[{elementtype.__name__}]'
                         from_dict_body_if_lists.append(f'classlist_{key} = data["{key}"]')
                         from_dict_body_ifbody_returnstr_tmp = f'classlist_{key}, '
-                    todict_body_str = f'"{key}": [x.to_dict() for x in self.{key}], '
+                    todict_body_str = f'"{key}": [x.to_dict() for x in self.{safe_key}], '
 
                 else:
                     typestr += f'[{elementtype.__name__}]'
-                    todict_body_str = f'"{key}": self.{key}, '
+                    todict_body_str = f'"{key}": self.{safe_key}, '
 
             # gets tricky here, heterogenous list -> unsolved
 
@@ -102,13 +106,18 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
             typestr = f'L_{layerdepth}_{keynum}'
             nthclassblocklist = decode_layer(val, classname=typestr, layerdepth=layerdepth+1)
             codeblocks += nthclassblocklist
-            todict_body_str = f'"{key}": self.{key}.to_dict(), '
-            from_dict_body_ifbody_returnstr_tmp = f'{typestr}.from_dict(data["{key}"]), '
+            if nthclassblocklist:
+                todict_body_str = f'"{key}": self.{safe_key}.to_dict(), '
+                from_dict_body_ifbody_returnstr_tmp = f'{typestr}.from_dict(data["{key}"]), '
+            else:
+                todict_body_str = f'"{key}": self.{safe_key}, '
+                from_dict_body_ifbody_returnstr_tmp = f'data["{key}"], '
+                typestr = f'dict'               
    
-        inithead += f', {key}:{typestr}'
+        inithead += f', {safe_key}:{typestr}'
         
         todict_body += todict_body_str
-        blockstr = f'self.{key} = {key}'
+        blockstr = f'self.{safe_key} = {safe_key}'
         initblock.append(blockstr)
 
         from_dict_body_if += f'"{key}" in data and '
@@ -133,7 +142,8 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
     fromdict_code_else = CodeBlock(from_dict_body_else, [from_dict_body_elsebody])
     fromdict_code = CodeBlock(from_dict_head, [fromdict_code_if, fromdict_code_else])
     classcodeblock = CodeBlock(classhead, [initcodepy, todict_code, '@classmethod', fromdict_code])
-    codeblocks.append(classcodeblock)
+    if keynum > 0: # if dict wasnt empty
+        codeblocks.append(classcodeblock)
     return codeblocks
 
 def dict_to_code(data:dict, filename:str) -> str:
@@ -229,5 +239,12 @@ def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:
         # in lines find every class definition and its name
         # list properties
 
+def to_safe_key(key:str) -> str:
+    if key in py_keywords_conv.keys():
+        safe_key = py_keywords_conv[key]
+    else:
+        safe_key = key
+
+    return safe_key
     
     

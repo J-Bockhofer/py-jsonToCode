@@ -159,6 +159,8 @@ def user_rename_class(serdecode:str):
     for i in range(0,len(classnames)):
         print(f'class:  {classnames[i]} \n {inits[i]}\n')
     oldname = user_get_class(classnames)
+    cidx = classnames.index(oldname)
+    print(f'Selected {oldname} with {inits[cidx]}')
     newname = user_get_new_name(oldname)
     serdecode = serdecode.replace(oldname, newname)
     return serdecode, newname, oldname

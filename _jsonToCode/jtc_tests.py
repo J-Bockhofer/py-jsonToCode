@@ -208,6 +208,66 @@ class L_0:
         self.maxDiff = None
         self.assertEqual(fulltxt, expected)
 
+
+    def test_decode_layer_nested_empty(self):
+        sampleDict = {'L1_Key1':'Object1', 
+        'L1_Key2':[1,2,3,4], 
+        'L1_Key3':{}
+        }
+
+        result = decode_layer(sampleDict)
+
+        expected = f'''\
+class L_0:
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:dict):
+        self.L1_Key1 = L1_Key1
+        self.L1_Key2 = L1_Key2
+        self.L1_Key3 = L1_Key3
+    def to_dict(self)->dict:
+        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data:
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"])
+        else:
+            raise KeyError("Invalid data for L_0")
+'''
+        self.maxDiff = None
+        fulltxt = ''
+        for res in result:
+            fulltxt += res.__str__()
+        self.assertEqual(fulltxt, expected)
+
+    def test_decode_layer_nested_pylang(self):
+        sampleDict = {'from':'Object1', 
+        'range':[1,2,3,4], 
+        'raise':{}
+        }
+
+        result = decode_layer(sampleDict)
+
+        expected = f'''\
+class L_0:
+    def __init__(self, FROM:str, RANGE:list[int], RAISE:dict):
+        self.FROM = FROM
+        self.RANGE = RANGE
+        self.RAISE = RAISE
+    def to_dict(self)->dict:
+        return {{"from": self.FROM, "range": self.RANGE, "raise": self.RAISE}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "from" in data and "range" in data and "raise" in data:
+            return cls(data["from"], data["range"], data["raise"])
+        else:
+            raise KeyError("Invalid data for L_0")
+'''
+        self.maxDiff = None
+        fulltxt = ''
+        for res in result:
+            fulltxt += res.__str__()
+        self.assertEqual(fulltxt, expected)
+
+
     def test_find_classes(self):
         text = f'''\
 class L_0_3:
