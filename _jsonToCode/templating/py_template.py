@@ -1,9 +1,14 @@
 from .codeblock import CodeBlock
+# Example Root Class
 # 'class L_0:'
 #    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:dict):
 #        self.L1_Key1 = L1_Key1
 #        self.L1_Key2 = L1_Key2
 #        self.L1_Key3 = L1_Key3
+#    def __eq__(self, other):
+#        return self.to_dict() == other
+#    def __str__(self):
+#        return f'L1_Key1 = {self.L1_Key1}, L1_Key2 = {self.L1_Key2}, L1_Key3 = {self.L1_Key3}
 #    def to_dict(self)->dict:
 #        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
 #    @classmethod
@@ -30,6 +35,28 @@ def make_init_block(safekeys:list[str], types:list[str])->CodeBlock:
     inithead += f')'
 
     return CodeBlock(inithead, initblock)
+
+def make_eq_block()->CodeBlock:
+    eqhead = 'def __eq__(self, other)'
+    eqbody = 'return self.to_dict() == other'
+    return CodeBlock(eqhead,[eqbody])
+
+def make_str_block(classname:str, safekeys:list[str], types:list[str])->CodeBlock:
+    strhead = 'def __str__(self)'
+    strbody= f"return f'{classname}: "
+    strbodytmp = ''
+    for i in range(0, len(safekeys)):
+        safekey = safekeys[i]
+        safekeystr = f'self.{safekey}'
+        strbodytmp = f'{safekey} = {{{safekeystr}.__str__()}}, ' # triple braces to get evaluated
+        if 'list[' in types[i]:
+            strbodytmp = f'{safekey} = {{[x.__str__() for x in {safekeystr}]}}, '
+
+        strbody += strbodytmp
+    strbody = strbody[:-2] # remove , and whitespace
+    strbody += "'" # add ' to end f-string
+
+    return CodeBlock(strhead, [strbody])
 
 def make_todict_block(inkeys:list[str], safekeys:list[str], types:list[str])->CodeBlock:
     """
@@ -117,4 +144,6 @@ def make_fromdict_block(classname:str,
 
     return CodeBlock(from_dict_head, [fromdict_code_if, fromdict_code_else])
 
-    
+def make_fromrandom_block()->CodeBlock:
+    pass
+

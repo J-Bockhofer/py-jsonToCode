@@ -1,6 +1,7 @@
 from templating.codeblock import CodeBlock
 from templating.py_lang import py_keywords_conv
-from templating.py_template import make_init_block, make_todict_block, make_fromdict_block
+import templating.py_template as pyt
+#from templating.py_template import make_init_block, make_todict_block, make_fromdict_block, make_eq_block
 
 import json
 import os
@@ -8,19 +9,17 @@ import os
 import re
 
 
-def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBlock]:
+def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=True) -> list[CodeBlock]:
     """
-        Refactor: Function decodes the current dictionary, recursively decodes any contained dictionaries \n
-        Generates code for classes with \n
+        Function decodes the current dictionary, recursively decodes any contained dictionaries \n
+        Generates code for classes with methods \n
         __init__() \n
+        __eq__() \n
+        __str__() \n
         to_dict() \n
         from_dict() \n
 
         \n
-        class ?: \n
-            __init__(self,?): \n
-            to_dict(self):  \n
-            from_dict(cls,?):   \n
             
     """
     if classname == '':
@@ -69,7 +68,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                     if lastdict:
                         if lastdict.keys() != element.keys(): # if dicts are not the same
                             classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
-                            nthclassblocklist = decode_layer_re(element, classname=classstr, layerdepth=layerdepth+1)
+                            nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                             codeblocks += nthclassblocklist
                             uniquedicts += 1
 
@@ -77,7 +76,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                         classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
                         lastdict = element
                         uniquedicts += 1
-                        nthclassblocklist = decode_layer_re(element, classname=classstr, layerdepth=layerdepth+1)
+                        nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                         codeblocks += nthclassblocklist
                         if nthclassblocklist:
                             addlisttype = f'[{classstr}]'
@@ -99,12 +98,12 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
                 else:
                     typestr += f'[{elementtype.__name__}]'
 
-            # gets tricky here, heterogenous list -> unsolved
+            # gets tricky here, heterogenous list -> potentially unsolved
 
         # if theres a dict decode that dict with layerdepth + 1
         if valtype == type({}):
             typestr = f'L_{layerdepth}_{keynum}'
-            nthclassblocklist = decode_layer_re(val, classname=typestr, layerdepth=layerdepth+1)
+            nthclassblocklist = decode_layer(val, classname=typestr, layerdepth=layerdepth+1)
             codeblocks += nthclassblocklist
             if nthclassblocklist:
                 validsingledict = 1
@@ -120,16 +119,18 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0) -> list[CodeBloc
 
         keynum += 1
 
-    initcodepy = make_init_block(safekeylist, typelist)
-    todict_code = make_todict_block(inkeylist, safekeylist, typelist)
-    fromdict_code = make_fromdict_block(classname, 
+    initcodepy = pyt.make_init_block(safekeylist, typelist)
+    eq_code = pyt.make_eq_block()
+    str_code = pyt.make_str_block(classname, safekeylist, typelist)
+    todict_code = pyt.make_todict_block(inkeylist, safekeylist, typelist)
+    fromdict_code = pyt.make_fromdict_block(classname, 
                                         inkeylist, 
                                         typelist, 
                                         uniquedictlist, 
                                         singledictlist, 
                                         classstrlist)
 
-    classcodeblock = CodeBlock(classhead, [initcodepy, todict_code, '@classmethod', fromdict_code])
+    classcodeblock = CodeBlock(classhead, [initcodepy, eq_code, str_code, todict_code, '@classmethod', fromdict_code])
     if keynum > 0: # if dict wasnt empty
         codeblocks.append(classcodeblock)
     return codeblocks
@@ -140,8 +141,9 @@ def dict_to_code(data:dict, filename:str) -> str:
     for res in result:
         fulltxt += res.__str__()
 
-        with open(filename, 'w') as f:
-            f.write(fulltxt)
+    with open(filename, 'w') as f:
+        f.write(fulltxt)
+
     return fulltxt
 
 def json_to_code(jsonfilename:str, codefilename:str, encoding:str='utf-8-sig') -> str:
@@ -297,7 +299,7 @@ def decode_layer_re(data:dict, classname:str='', layerdepth:int=0) -> list[CodeB
                     if lastdict:
                         if lastdict.keys() != element.keys(): # if dicts are not the same
                             classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
-                            nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
+                            nthclassblocklist = decode_layer_re(element, classname=classstr, layerdepth=layerdepth+1)
                             codeblocks += nthclassblocklist
                             uniquedicts += 1
 
@@ -305,7 +307,7 @@ def decode_layer_re(data:dict, classname:str='', layerdepth:int=0) -> list[CodeB
                         classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
                         lastdict = element
                         uniquedicts += 1
-                        nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
+                        nthclassblocklist = decode_layer_re(element, classname=classstr, layerdepth=layerdepth+1)
                         codeblocks += nthclassblocklist
                         if nthclassblocklist:
                             addlisttype = f'[{classstr}]'
@@ -341,7 +343,7 @@ def decode_layer_re(data:dict, classname:str='', layerdepth:int=0) -> list[CodeB
         # if theres a dict decode that dict with layerdepth + 1
         if valtype == type({}):
             typestr = f'L_{layerdepth}_{keynum}'
-            nthclassblocklist = decode_layer(val, classname=typestr, layerdepth=layerdepth+1)
+            nthclassblocklist = decode_layer_re(val, classname=typestr, layerdepth=layerdepth+1)
             codeblocks += nthclassblocklist
             if nthclassblocklist:
                 todict_body_str = f'"{key}": self.{safe_key}.to_dict(), '
@@ -374,11 +376,12 @@ def decode_layer_re(data:dict, classname:str='', layerdepth:int=0) -> list[CodeB
     todict_body += '}'
 
     initcodepy = CodeBlock(inithead, initblock)
+    eq_code = pyt.make_eq_block()
     todict_code = CodeBlock(todict_head, [todict_body])
     fromdict_code_if = CodeBlock(from_dict_body_if, from_dict_body_if_lists + [from_dict_body_ifbody_returnstr])
     fromdict_code_else = CodeBlock(from_dict_body_else, [from_dict_body_elsebody])
     fromdict_code = CodeBlock(from_dict_head, [fromdict_code_if, fromdict_code_else])
-    classcodeblock = CodeBlock(classhead, [initcodepy, todict_code, '@classmethod', fromdict_code])
+    classcodeblock = CodeBlock(classhead, [initcodepy, eq_code, todict_code, '@classmethod', fromdict_code])
     if keynum > 0: # if dict wasnt empty
         codeblocks.append(classcodeblock)
     return codeblocks

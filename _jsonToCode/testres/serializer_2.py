@@ -2,6 +2,10 @@ class L_1_4:
     def __init__(self, id:int, name:str):
         self.id = id
         self.name = name
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_1_4: id = {self.id.__str__()}, name = {self.name.__str__()}'
     def to_dict(self)->dict:
         return {"id": self.id, "name": self.name}
     @classmethod
@@ -17,6 +21,10 @@ class L_0_1_1:
         self.department = department
         self.skills = skills
         self.manager = manager
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_1_1: id = {self.id.__str__()}, name = {self.name.__str__()}, department = {self.department.__str__()}, skills = {[x.__str__() for x in self.skills]}, manager = {self.manager.__str__()}'
     def to_dict(self)->dict:
         return {"id": self.id, "name": self.name, "department": self.department, "skills": self.skills, "manager": self.manager.to_dict()}
     @classmethod
@@ -33,6 +41,10 @@ class L_0_2_1:
         self.start_date = start_date
         self.end_date = end_date
         self.team = team
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_2_1: project_id = {self.project_id.__str__()}, project_name = {self.project_name.__str__()}, description = {self.description.__str__()}, start_date = {self.start_date.__str__()}, end_date = {self.end_date.__str__()}, team = {[x.__str__() for x in self.team]}'
     def to_dict(self)->dict:
         return {"project_id": self.project_id, "project_name": self.project_name, "description": self.description, "start_date": self.start_date, "end_date": self.end_date, "team": self.team}
     @classmethod
@@ -46,6 +58,10 @@ class L_0_3_1:
         self.office_name = office_name
         self.city = city
         self.country = country
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_3_1: office_name = {self.office_name.__str__()}, city = {self.city.__str__()}, country = {self.country.__str__()}'
     def to_dict(self)->dict:
         return {"office_name": self.office_name, "city": self.city, "country": self.country}
     @classmethod
@@ -60,6 +76,10 @@ class L_0:
         self.employees = employees
         self.projects = projects
         self.locations = locations
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0: company = {self.company.__str__()}, employees = {[x.__str__() for x in self.employees]}, projects = {[x.__str__() for x in self.projects]}, locations = {[x.__str__() for x in self.locations]}'
     def to_dict(self)->dict:
         return {"company": self.company, "employees": [x.to_dict() for x in self.employees], "projects": [x.to_dict() for x in self.projects], "locations": [x.to_dict() for x in self.locations]}
     @classmethod

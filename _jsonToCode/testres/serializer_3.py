@@ -3,6 +3,10 @@ class L_1_5_1:
         self.user = user
         self.rating = rating
         self.comment = comment
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_1_5_1: user = {self.user.__str__()}, rating = {self.rating.__str__()}, comment = {self.comment.__str__()}'
     def to_dict(self)->dict:
         return {"user": self.user, "rating": self.rating, "comment": self.comment}
     @classmethod
@@ -19,6 +23,10 @@ class L_0_2_1:
         self.price = price
         self.quantity = quantity
         self.reviews = reviews
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_2_1: product_id = {self.product_id.__str__()}, name = {self.name.__str__()}, description = {self.description.__str__()}, price = {self.price.__str__()}, quantity = {self.quantity.__str__()}, reviews = {[x.__str__() for x in self.reviews]}'
     def to_dict(self)->dict:
         return {"product_id": self.product_id, "name": self.name, "description": self.description, "price": self.price, "quantity": self.quantity, "reviews": [x.to_dict() for x in self.reviews]}
     @classmethod
@@ -32,6 +40,10 @@ class L_1_2_1:
     def __init__(self, product_id:str, quantity:int):
         self.product_id = product_id
         self.quantity = quantity
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_1_2_1: product_id = {self.product_id.__str__()}, quantity = {self.quantity.__str__()}'
     def to_dict(self)->dict:
         return {"product_id": self.product_id, "quantity": self.quantity}
     @classmethod
@@ -47,6 +59,10 @@ class L_0_3_1:
         self.items = items
         self.total_price = total_price
         self.order_date = order_date
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_3_1: order_id = {self.order_id.__str__()}, customer_name = {self.customer_name.__str__()}, items = {[x.__str__() for x in self.items]}, total_price = {self.total_price.__str__()}, order_date = {self.order_date.__str__()}'
     def to_dict(self)->dict:
         return {"order_id": self.order_id, "customer_name": self.customer_name, "items": [x.to_dict() for x in self.items], "total_price": self.total_price, "order_date": self.order_date}
     @classmethod
@@ -62,6 +78,10 @@ class L_0:
         self.location = location
         self.inventory = inventory
         self.orders = orders
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0: store = {self.store.__str__()}, location = {self.location.__str__()}, inventory = {[x.__str__() for x in self.inventory]}, orders = {[x.__str__() for x in self.orders]}'
     def to_dict(self)->dict:
         return {"store": self.store, "location": self.location, "inventory": [x.to_dict() for x in self.inventory], "orders": [x.to_dict() for x in self.orders]}
     @classmethod
