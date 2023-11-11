@@ -1,6 +1,6 @@
 import unittest
 from templating.codeblock import CodeBlock
-from jtc_core import decode_layer, json_to_code, dict_to_code, find_classes, find_inits_for_classes
+from jtc_core import decode_layer, decode_layer_re, json_to_code, dict_to_code, find_classes, find_inits_for_classes
 
 import os
 import json
@@ -258,6 +258,36 @@ class L_0:
     def from_dict(cls, data:dict):
         if "from" in data and "range" in data and "raise" in data:
             return cls(data["from"], data["range"], data["raise"])
+        else:
+            raise KeyError("Invalid data for L_0")
+'''
+        self.maxDiff = None
+        fulltxt = ''
+        for res in result:
+            fulltxt += res.__str__()
+        self.assertEqual(fulltxt, expected)
+
+
+    def test_decode_layer_re_nested_empty(self):
+        sampleDict = {'L1_Key1':'Object1', 
+        'L1_Key2':[1,2,3,4], 
+        'L1_Key3':{}
+        }
+
+        result = decode_layer_re(sampleDict)
+
+        expected = f'''\
+class L_0:
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:dict):
+        self.L1_Key1 = L1_Key1
+        self.L1_Key2 = L1_Key2
+        self.L1_Key3 = L1_Key3
+    def to_dict(self)->dict:
+        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
+    @classmethod
+    def from_dict(cls, data:dict):
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data:
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"])
         else:
             raise KeyError("Invalid data for L_0")
 '''

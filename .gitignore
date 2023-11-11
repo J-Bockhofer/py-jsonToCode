@@ -6,7 +6,7 @@ __pycache__/
 # scribble files
 _jsonToCode/manualTest.py
 _jsonToCode/scribbels.py
-
+_jsonToCode/local/
 # C extensions
 *.so
 
