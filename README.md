@@ -33,11 +33,11 @@ and calling the `.from_dict()` method of the main class \
 (default name: L_0)
 
 ```python
-    from testres.serializer_2 import *
+from testres.serializer_2 import *
 
-    with open("./testres/testjson_2.json", "r", encoding="utf-8-sig") as data_file:
-        data = json.load(data_file)
-    root = L_0.from_dict(data)
+with open("./testres/testjson_2.json", "r", encoding="utf-8-sig") as data_file:
+    data = json.load(data_file)
+root = L_0.from_dict(data)
 
 ```
 \
@@ -57,20 +57,24 @@ or  :   _r_ or _1_ for renaming classes in generated code
 
 ### Serializer example (./testres/serializer_1.py):
 ```python
-class rootDir:
-    def __init__(self, user:user, products:list[item], timestamp:str):
+class Cart:
+    def __init__(self, user:User, products:list[Item], timestamp:str):
         self.user = user
         self.products = products
         self.timestamp = timestamp
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'Cart: user = {self.user.__str__()}, products = {[x.__str__() for x in self.products]}, timestamp = {self.timestamp.__str__()}'
     def to_dict(self)->dict:
         return {"user": self.user.to_dict(), "products": [x.to_dict() for x in self.products], "timestamp": self.timestamp}
     @classmethod
     def from_dict(cls, data:dict):
         if "user" in data and "products" in data and "timestamp" in data:
-            classlist_products = [item.from_dict(classdata) for classdata in data.get("products", [])]
-            return cls(user.from_dict(data["user"]), classlist_products, data["timestamp"])
+            classlist_products = [Item.from_dict(classdata) for classdata in data.get("products", [])]
+            return cls(User.from_dict(data["user"]), classlist_products, data["timestamp"])
         else:
-            raise KeyError("Invalid data for rootDir")
+            raise KeyError("Invalid data for Cart")
 ```
 
 ### Test example (./testres/test_serializer_1.py):
@@ -81,12 +85,13 @@ from serializer_1 import *
 
 class TestSerializer(unittest.TestCase):
     def test_serializer(self):
-        with open("testjson_1.json", "r", encoding="utf-8-sig") as data_file:
+        with open("/home/pi/projects/pyserde/_jsonToCode/testres/testjson_1.json", "r", encoding="utf-8-sig") as data_file:
             data = json.load(data_file)
-        root = rootDir.from_dict(data)
+        root = Cart.from_dict(data)
         data_b = root.to_dict()
         self.maxDiff = None
         self.assertEqual(data, data_b)
 if __name__ == "__main__":
     unittest.main()
+
 ```
