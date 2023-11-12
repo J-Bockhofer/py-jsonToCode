@@ -1,4 +1,6 @@
 from .codeblock import CodeBlock
+
+import re
 # Example Root Class
 # 'class L_0:'
 #    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:dict):
@@ -85,7 +87,7 @@ def make_todict_block(inkeys:list[str], safekeys:list[str], types:list[str])->Co
     todict_body = 'return {'
     for i in range(0, len(safekeys)):
         todict_body_str = f'"{inkeys[i]}": self.{safekeys[i]}, '
-        if 'list[L_' in types[i] or 'list[dict]' in types[i]:
+        if 'list[L_' in types[i]:
             # list of classes
             todict_body_str = f'"{inkeys[i]}": [x.to_dict() for x in self.{safekeys[i]}], '
         elif 'list[' in types[i]:
@@ -159,6 +161,75 @@ def make_fromdict_block(classname:str,
 
     return CodeBlock(from_dict_head, [fromdict_code_if, fromdict_code_else])
 
-def make_fromrandom_block()->CodeBlock:
-    pass
+def make_fromrandom_block(classname:str, safekeys:list[str], types:list[str])->CodeBlock:
+    # will need import random & string into serializer
+    # define random generation
+    randstr = '\'\'.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))'
+    randint = 'random.randint(lowlim, uplim)'
+    randfloat = 'random.uniform(lowlim, uplim)'
+    randbool = 'bool(random.getrandbits(1))'
+    randclassend = '.from_random(seed, lowlim, uplim)'
+    _forliststr = ' for _ in range(lowlim, uplim)]' # for uniform lists
 
+    # def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'L_0_2_1'
+    from_rand_head = f'def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->\'{classname}\''
+    from_rand_seedif = 'if seed'
+    from_rand_seedbody = 'random.seed(seed)'
+    from_rand_body = [CodeBlock(from_rand_seedif,[from_rand_seedbody])]
+    from_rand_return = 'return cls('
+    for i in range(0, len(safekeys)):
+        ctype = types[i]
+        cskey = safekeys[i]
+        # add to return string
+        from_rand_return += f'{cskey}, '
+        # check types
+        if ctype == 'int':
+            from_rand_body.append(f'{cskey} = ' + randint)
+        if ctype == 'str':
+            from_rand_body.append(f'{cskey} = ' + randstr)
+        if ctype == 'float':
+            from_rand_body.append(f'{cskey} = ' + randfloat)
+        if ctype == 'bool':
+            from_rand_body.append(f'{cskey} = ' + randbool)          
+        if ctype == 'dict':
+            from_rand_body.append(f'{cskey} = {{}}')
+        if 'list' in ctype:
+            # its a typed list
+            liststrtmp = f'{cskey} = ['
+            listtype = re.findall(r'\[(.*)\]', ctype)
+            if listtype:
+                #typed list
+                listtype = listtype[0]
+                if listtype == 'int':
+                    liststrtmp += randint + _forliststr
+                if listtype == 'str':
+                    liststrtmp += randstr + _forliststr
+                if listtype == 'float':
+                    liststrtmp += randfloat + _forliststr
+                if listtype == 'bool':
+                    liststrtmp += randbool + _forliststr                    
+                if listtype == 'list':
+                    liststrtmp += '[]' + _forliststr
+                if listtype == 'dict':
+                    liststrtmp += '{}' + _forliststr
+                if 'L_' in listtype:
+                    liststrtmp += f'{listtype}'+ randclassend +_forliststr
+            else:
+                liststrtmp += ']'
+            from_rand_body.append(liststrtmp)
+        elif 'L_' in ctype:
+            # just a class, no need to panic
+            from_rand_body.append(f'{cskey} = {ctype}' + randclassend)
+    # cut whitespace + , from returnstring
+    from_rand_return = from_rand_return[:-2]
+    from_rand_return += ')'
+    from_rand_body.append(from_rand_return)
+    return CodeBlock(from_rand_head, from_rand_body)
+
+def make_doc_string(classname:str, initblock:CodeBlock)->str:
+    docstring = f'''\
+"""
+        {classname}:
+        {initblock.head}
+    """'''
+    return docstring

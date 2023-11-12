@@ -60,15 +60,18 @@ Type:   _g_ or _0_ for generating code\
 or  :   _r_ or _1_ for renaming classes in generated code
 
 
-### Serializer example (./testres/serializer_1.py):
+### Generated Class example (./testres/serializer_1.py):
 ```python
 class Root:
-    def __init__(self, user:User, products:list[Products], timestamp:str):
+    """
+        Root:
+        def __init__(self, user:User, products:list[Product], timestamp:str)
+    """
+    def __init__(self, user:User, products:list[Product], timestamp:str):
         self.user = user
         self.products = products
         self.timestamp = timestamp
     def __eq__(self, other):
-        return self.to_dict() == other
     def __str__(self):
         return f'Root: user = {self.user.__str__()}, products = {[x.__str__() for x in self.products]}, timestamp = {self.timestamp.__str__()}'
     def __repr__(self):
@@ -78,13 +81,21 @@ class Root:
     @classmethod
     def from_dict(cls, data:dict)->'Root':
         if "user" in data and "products" in data and "timestamp" in data:
-            classlist_products = [Products.from_dict(classdata) for classdata in data.get("products", [])]
+            classlist_products = [Product.from_dict(classdata) for classdata in data.get("products", [])]
             return cls(User.from_dict(data["user"]), classlist_products, data["timestamp"])
         else:
             raise KeyError("Invalid data for Root")
+    @classmethod
+    def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'Root':
+        if seed:
+            random.seed(seed)
+        user = User.from_random(seed, lowlim, uplim)
+        products = [Product.from_random(seed, lowlim, uplim) for _ in range(lowlim, uplim)]
+        timestamp = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))
+        return cls(user, products, timestamp)
 ```
 
-### Test example (./testres/test_serializer_1.py):
+### Generated Test example (./testres/test_serializer_1.py):
 ```python
 import unittest
 import json
@@ -103,6 +114,12 @@ class TestSerializer(unittest.TestCase):
         with open("testjson_1.json", "r", encoding="utf-8-sig") as data_file:
             data = json.load(data_file)
         root = Root.from_dict(data)
+        root_b = eval(repr(root))
+        self.maxDiff = None
+        self.assertEqual(root, root_b)
+    
+    def test_rand(self):
+        root = Root.from_random()
         root_b = eval(repr(root))
         self.maxDiff = None
         self.assertEqual(root, root_b)

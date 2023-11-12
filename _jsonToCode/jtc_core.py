@@ -119,7 +119,8 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
 
         keynum += 1
 
-    initcodepy = pyt.make_init_block(safekeylist, typelist)
+
+    init_block = pyt.make_init_block(safekeylist, typelist)
     eq_code = pyt.make_eq_block()
     str_code = pyt.make_str_block(classname, safekeylist, typelist)
     repr_code = pyt.make_repr_block(classname, safekeylist, typelist)
@@ -130,15 +131,22 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
                                         uniquedictlist, 
                                         singledictlist, 
                                         classstrlist)
+    fromrand_code = pyt.make_fromrandom_block(classname, safekeylist, typelist)
+    docstring = pyt.make_doc_string(classname, init_block)
 
-    classcodeblock = CodeBlock(classhead, [initcodepy, eq_code, str_code, repr_code, todict_code, '@classmethod', fromdict_code])
+    classcodeblock = CodeBlock(classhead, [docstring, init_block, eq_code, str_code, repr_code, todict_code, '@classmethod', fromdict_code, '@classmethod', fromrand_code])
     if keynum > 0: # if dict wasnt empty
         codeblocks.append(classcodeblock)
     return codeblocks
 
 def dict_to_code(data:dict, filename:str) -> str:
     result = decode_layer(data)
-    fulltxt = ''
+    importhead = f'''\
+import random
+import string
+
+'''
+    fulltxt = importhead
     for res in result:
         fulltxt += res.__str__()
 
@@ -186,11 +194,18 @@ from {module} import *
                     'self.maxDiff = None',
                     'self.assertEqual(root, root_b)']
 
+    testrandhead = 'def test_rand(self)'
+    testrandbody = ['root = L_0.from_random()',
+                    'root_b = eval(repr(root))',
+                    'self.maxDiff = None',
+                    'self.assertEqual(root, root_b)']
     testserdecode = CodeBlock(testserdehead, testserdebody)
 
     testreprcode = CodeBlock(testreprhead, testreprbody)
 
-    testcode = CodeBlock(testcodehead, [testserdecode,'', testreprcode])
+    testrandcode = CodeBlock(testrandhead, testrandbody)
+
+    testcode = CodeBlock(testcodehead, [testserdecode,'', testreprcode, '', testrandcode])
 
     dundermain = CodeBlock('if __name__ == "__main__"',['unittest.main()'])
 
@@ -221,7 +236,7 @@ def find_classes(text:str) -> list[str]:
 def find_inits_for_classes(text:str, class_names:list[str]) ->list[str]:
     inits = []
     for name in class_names:
-        init = re.findall(r'.*class '+re.escape(name)+r':\n.*(def __init__\(.*\)):', text)[0]
+        init = re.findall(r'.*class '+re.escape(name)+r':[\s\S\w\W]*?(def __init__\(.*\)):', text)[0]
         inits.append(init)
     return inits
 
@@ -255,12 +270,17 @@ def auto_rename(code:str, testcode:str='')->dict:
     contexts[classnames[0]] = 'Root'
 
     for classname in contexts.keys():
-        code = rename_class(classname, contexts[classname].capitalize(), code)
+        context = contexts[classname].capitalize()
+        if context[-1] == 's': # remove trailing s
+            context = context[:-1]
+            if context[-2:] == 'ie': # convert english plural to singular
+                context = context[:-2] + 'y'
+
+        code = rename_class(classname, context, code)
         if testcode:
-            testcode = rename_class(classname, contexts[classname].capitalize(), testcode)
+            testcode = rename_class(classname, context, testcode)
 
     return {'code':code, 'test':testcode}
-
 
 def to_safe_key(key:str) -> str:
     if key in py_keywords_conv.keys():

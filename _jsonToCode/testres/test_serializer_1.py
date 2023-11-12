@@ -18,5 +18,11 @@ class TestSerializer(unittest.TestCase):
         root_b = eval(repr(root))
         self.maxDiff = None
         self.assertEqual(root, root_b)
+    
+    def test_rand(self):
+        root = Root.from_random()
+        root_b = eval(repr(root))
+        self.maxDiff = None
+        self.assertEqual(root, root_b)
 if __name__ == "__main__":
     unittest.main()
