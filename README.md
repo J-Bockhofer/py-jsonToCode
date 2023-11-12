@@ -21,10 +21,15 @@ jsonfile = './testres/testjson_1.json' # point to your .json
 codetofile = './example_serializer.py' # file to create the code in
 
 # generate the serializer
-jtc.json_to_code(jsonfile, codetofile, encoding='utf-8-sig')
+jsoncode = jtc.json_to_code(jsonfile, codetofile, encoding='utf-8-sig')
 
 # optionally generate a unittest for the serializer
-jtc.generate_test(jsonfile, codetofile)
+testcode, testfile = jtc.generate_test(jsonfile, codetofile)
+
+# rename the classes 
+from jtc_cli import cli_quick_rename
+
+cli_quick_rename(codetofile, testfile)
 
 ```
 \
@@ -57,24 +62,26 @@ or  :   _r_ or _1_ for renaming classes in generated code
 
 ### Serializer example (./testres/serializer_1.py):
 ```python
-class Cart:
-    def __init__(self, user:User, products:list[Item], timestamp:str):
+class Root:
+    def __init__(self, user:User, products:list[Products], timestamp:str):
         self.user = user
         self.products = products
         self.timestamp = timestamp
     def __eq__(self, other):
         return self.to_dict() == other
     def __str__(self):
-        return f'Cart: user = {self.user.__str__()}, products = {[x.__str__() for x in self.products]}, timestamp = {self.timestamp.__str__()}'
+        return f'Root: user = {self.user.__str__()}, products = {[x.__str__() for x in self.products]}, timestamp = {self.timestamp.__str__()}'
+    def __repr__(self):
+        return f'Root(user={repr(self.user)}, products={repr(self.products)}, timestamp={repr(self.timestamp)})'
     def to_dict(self)->dict:
         return {"user": self.user.to_dict(), "products": [x.to_dict() for x in self.products], "timestamp": self.timestamp}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'Root':
         if "user" in data and "products" in data and "timestamp" in data:
-            classlist_products = [Item.from_dict(classdata) for classdata in data.get("products", [])]
+            classlist_products = [Products.from_dict(classdata) for classdata in data.get("products", [])]
             return cls(User.from_dict(data["user"]), classlist_products, data["timestamp"])
         else:
-            raise KeyError("Invalid data for Cart")
+            raise KeyError("Invalid data for Root")
 ```
 
 ### Test example (./testres/test_serializer_1.py):
@@ -87,10 +94,18 @@ class TestSerializer(unittest.TestCase):
     def test_serializer(self):
         with open("testjson_1.json", "r", encoding="utf-8-sig") as data_file:
             data = json.load(data_file)
-        root = Cart.from_dict(data)
+        root = Root.from_dict(data)
         data_b = root.to_dict()
         self.maxDiff = None
         self.assertEqual(data, data_b)
+    
+    def test_repr(self):
+        with open("testjson_1.json", "r", encoding="utf-8-sig") as data_file:
+            data = json.load(data_file)
+        root = Root.from_dict(data)
+        root_b = eval(repr(root))
+        self.maxDiff = None
+        self.assertEqual(root, root_b)
 if __name__ == "__main__":
     unittest.main()
 
