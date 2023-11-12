@@ -122,6 +122,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
     initcodepy = pyt.make_init_block(safekeylist, typelist)
     eq_code = pyt.make_eq_block()
     str_code = pyt.make_str_block(classname, safekeylist, typelist)
+    repr_code = pyt.make_repr_block(classname, safekeylist, typelist)
     todict_code = pyt.make_todict_block(inkeylist, safekeylist, typelist)
     fromdict_code = pyt.make_fromdict_block(classname, 
                                         inkeylist, 
@@ -130,7 +131,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
                                         singledictlist, 
                                         classstrlist)
 
-    classcodeblock = CodeBlock(classhead, [initcodepy, eq_code, str_code, todict_code, '@classmethod', fromdict_code])
+    classcodeblock = CodeBlock(classhead, [initcodepy, eq_code, str_code, repr_code, todict_code, '@classmethod', fromdict_code])
     if keynum > 0: # if dict wasnt empty
         codeblocks.append(classcodeblock)
     return codeblocks
@@ -169,19 +170,27 @@ from {module} import *
 
 '''
     testcodehead = 'class TestSerializer(unittest.TestCase)'
-    testfunchead = 'def test_serializer(self)'
+    testserdehead = 'def test_serializer(self)'
     testopenhead = f'with open("{jsonfilename}", "r", encoding="{encoding}") as data_file'
     testopenbody = 'data = json.load(data_file)' 
     testopencode = CodeBlock(testopenhead, [testopenbody])
-    testfuncbody = [testopencode,
+    testserdebody = [testopencode,
                     'root = L_0.from_dict(data)',
                     'data_b = root.to_dict()',
                     'self.maxDiff = None',
                     'self.assertEqual(data, data_b)']
-    
-    testfunccode = CodeBlock(testfunchead, testfuncbody)
+    testreprhead = 'def test_repr(self)'
+    testreprbody = [testopencode,
+                    'root = L_0.from_dict(data)',
+                    'root_b = eval(repr(root))',
+                    'self.maxDiff = None',
+                    'self.assertEqual(root, root_b)']
 
-    testcode = CodeBlock(testcodehead, [testfunccode])
+    testserdecode = CodeBlock(testserdehead, testserdebody)
+
+    testreprcode = CodeBlock(testreprhead, testreprbody)
+
+    testcode = CodeBlock(testcodehead, [testserdecode,'', testreprcode])
 
     dundermain = CodeBlock('if __name__ == "__main__"',['unittest.main()'])
 
@@ -216,6 +225,20 @@ def find_inits_for_classes(text:str, class_names:list[str]) ->list[str]:
         inits.append(init)
     return inits
 
+def find_class_contexts(classnames:list[str], inits:list[str])->dict:
+    # only non-root class contexts, root is always classnames[0]
+    classnames = classnames[1:]
+    classcontext = {}
+    for i in range(0,len(inits)):
+        init = inits[i]
+        properties = re.findall(r'(\w+:[A-Za-z\[\]\_0-9]+)', init)
+        for p in properties:
+            for classname in classnames:
+                if classname in p:            
+                    context = re.findall(r'(\w+):', p)[0]
+                    classcontext[classname] = context
+    return classcontext
+
 def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:
     root_name = re.findall(r'.*root = (.+).from_dict', testcode)[0]
     if oldname:
@@ -225,9 +248,19 @@ def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:
         testcode = testcode.replace(root_name, newName)
     return testcode
 
+def auto_rename(code:str, testcode:str='')->dict:
+    classnames = find_classes(code)
+    inits = find_inits_for_classes(code, classnames)
+    contexts = find_class_contexts(classnames, inits)
+    contexts[classnames[0]] = 'Root'
 
-        # in lines find every class definition and its name
-        # list properties
+    for classname in contexts.keys():
+        code = rename_class(classname, contexts[classname].capitalize(), code)
+        if testcode:
+            testcode = rename_class(classname, contexts[classname].capitalize(), testcode)
+
+    return {'code':code, 'test':testcode}
+
 
 def to_safe_key(key:str) -> str:
     if key in py_keywords_conv.keys():

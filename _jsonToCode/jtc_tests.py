@@ -1,6 +1,6 @@
 import unittest
 from templating.codeblock import CodeBlock
-from jtc_core import decode_layer, decode_layer_re, json_to_code, dict_to_code, find_classes, find_inits_for_classes
+from jtc_core import decode_layer, decode_layer_re, json_to_code, dict_to_code, find_classes, find_inits_for_classes, find_class_contexts
 
 import os
 import json
@@ -42,10 +42,12 @@ class L_0:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0: L1_Key1 = {{self.L1_Key1.__str__()}}, L1_Key2 = {{[x.__str__() for x in self.L1_Key2]}}, L1_Key3 = {{[x.__str__() for x in self.L1_Key3]}}'
+    def __repr__(self):
+        return f'L_0(L1_Key1={{repr(self.L1_Key1)}}, L1_Key2={{repr(self.L1_Key2)}}, L1_Key3={{repr(self.L1_Key3)}})'
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data:
             return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"])
         else:
@@ -84,10 +86,12 @@ class L_0_3:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0_3: L2_Key1 = {{self.L2_Key1.__str__()}}, L2_Key2 = {{[x.__str__() for x in self.L2_Key2]}}'
+    def __repr__(self):
+        return f'L_0_3(L2_Key1={{repr(self.L2_Key1)}}, L2_Key2={{repr(self.L2_Key2)}})'
     def to_dict(self)->dict:
         return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0_3':
         if "L2_Key1" in data and "L2_Key2" in data:
             return cls(data["L2_Key1"], data["L2_Key2"])
         else:
@@ -100,10 +104,12 @@ class L_0_4_1:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0_4_1: L3_Key1 = {{self.L3_Key1.__str__()}}, L3_Key2 = {{[x.__str__() for x in self.L3_Key2]}}'
+    def __repr__(self):
+        return f'L_0_4_1(L3_Key1={{repr(self.L3_Key1)}}, L3_Key2={{repr(self.L3_Key2)}})'
     def to_dict(self)->dict:
         return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0_4_1':
         if "L3_Key1" in data and "L3_Key2" in data:
             return cls(data["L3_Key1"], data["L3_Key2"])
         else:
@@ -116,10 +122,12 @@ class L_0_4_2:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0_4_2: L4_Key1 = {{self.L4_Key1.__str__()}}, L4_Key2 = {{[x.__str__() for x in self.L4_Key2]}}'
+    def __repr__(self):
+        return f'L_0_4_2(L4_Key1={{repr(self.L4_Key1)}}, L4_Key2={{repr(self.L4_Key2)}})'
     def to_dict(self)->dict:
         return {{"L4_Key1": self.L4_Key1, "L4_Key2": self.L4_Key2}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0_4_2':
         if "L4_Key1" in data and "L4_Key2" in data:
             return cls(data["L4_Key1"], data["L4_Key2"])
         else:
@@ -135,10 +143,12 @@ class L_0:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0: L1_Key1 = {{self.L1_Key1.__str__()}}, L1_Key2 = {{[x.__str__() for x in self.L1_Key2]}}, L1_Key3 = {{[x.__str__() for x in self.L1_Key3]}}, L1_Key4 = {{self.L1_Key4.__str__()}}, L1_Key5 = {{[x.__str__() for x in self.L1_Key5]}}'
+    def __repr__(self):
+        return f'L_0(L1_Key1={{repr(self.L1_Key1)}}, L1_Key2={{repr(self.L1_Key2)}}, L1_Key3={{repr(self.L1_Key3)}}, L1_Key4={{repr(self.L1_Key4)}}, L1_Key5={{repr(self.L1_Key5)}})'
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
             classlist_L1_Key5 = data["L1_Key5"]
             return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
@@ -171,10 +181,12 @@ class L_0_3:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0_3: L2_Key1 = {{self.L2_Key1.__str__()}}, L2_Key2 = {{[x.__str__() for x in self.L2_Key2]}}'
+    def __repr__(self):
+        return f'L_0_3(L2_Key1={{repr(self.L2_Key1)}}, L2_Key2={{repr(self.L2_Key2)}})'
     def to_dict(self)->dict:
         return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0_3':
         if "L2_Key1" in data and "L2_Key2" in data:
             return cls(data["L2_Key1"], data["L2_Key2"])
         else:
@@ -187,10 +199,12 @@ class L_0_4_1:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0_4_1: L3_Key1 = {{self.L3_Key1.__str__()}}, L3_Key2 = {{[x.__str__() for x in self.L3_Key2]}}'
+    def __repr__(self):
+        return f'L_0_4_1(L3_Key1={{repr(self.L3_Key1)}}, L3_Key2={{repr(self.L3_Key2)}})'
     def to_dict(self)->dict:
         return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0_4_1':
         if "L3_Key1" in data and "L3_Key2" in data:
             return cls(data["L3_Key1"], data["L3_Key2"])
         else:
@@ -206,10 +220,12 @@ class L_0:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0: L1_Key1 = {{self.L1_Key1.__str__()}}, L1_Key2 = {{[x.__str__() for x in self.L1_Key2]}}, L1_Key3 = {{[x.__str__() for x in self.L1_Key3]}}, L1_Key4 = {{self.L1_Key4.__str__()}}, L1_Key5 = {{[x.__str__() for x in self.L1_Key5]}}'
+    def __repr__(self):
+        return f'L_0(L1_Key1={{repr(self.L1_Key1)}}, L1_Key2={{repr(self.L1_Key2)}}, L1_Key3={{repr(self.L1_Key3)}}, L1_Key4={{repr(self.L1_Key4)}}, L1_Key5={{repr(self.L1_Key5)}})'
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
             classlist_L1_Key5 = [L_0_4_1.from_dict(classdata) for classdata in data.get("L1_Key5", [])]
             return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
@@ -242,10 +258,12 @@ class L_0:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0: L1_Key1 = {{self.L1_Key1.__str__()}}, L1_Key2 = {{[x.__str__() for x in self.L1_Key2]}}, L1_Key3 = {{self.L1_Key3.__str__()}}'
+    def __repr__(self):
+        return f'L_0(L1_Key1={{repr(self.L1_Key1)}}, L1_Key2={{repr(self.L1_Key2)}}, L1_Key3={{repr(self.L1_Key3)}})'
     def to_dict(self)->dict:
         return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data:
             return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"])
         else:
@@ -276,10 +294,12 @@ class L_0:
         return self.to_dict() == other
     def __str__(self):
         return f'L_0: FROM = {{self.FROM.__str__()}}, RANGE = {{[x.__str__() for x in self.RANGE]}}, RAISE = {{self.RAISE.__str__()}}'
+    def __repr__(self):
+        return f'L_0(FROM={{repr(self.FROM)}}, RANGE={{repr(self.RANGE)}}, RAISE={{repr(self.RAISE)}})'
     def to_dict(self)->dict:
         return {{"from": self.FROM, "range": self.RANGE, "raise": self.RAISE}}
     @classmethod
-    def from_dict(cls, data:dict):
+    def from_dict(cls, data:dict)->'L_0':
         if "from" in data and "range" in data and "raise" in data:
             return cls(data["from"], data["range"], data["raise"])
         else:
@@ -469,6 +489,75 @@ class L_0:
         self.maxDiff = None
         self.assertEqual(inits, expected)    
 
+    def test_find_contexts(self):
+        text = f'''\
+class L_0_3:
+    def __init__(self, L2_Key1:str, L2_Key2:list[int]):
+        self.L2_Key1 = L2_Key1
+        self.L2_Key2 = L2_Key2
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_3: L2_Key1 = {{self.L2_Key1.__str__()}}, L2_Key2 = {{[x.__str__() for x in self.L2_Key2]}}'
+    def __repr__(self):
+        return f'L_0_3(L2_Key1={{repr(self.L2_Key1)}}, L2_Key2={{repr(self.L2_Key2)}})'
+    def to_dict(self)->dict:
+        return {{"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict)->'L_0_3':
+        if "L2_Key1" in data and "L2_Key2" in data:
+            return cls(data["L2_Key1"], data["L2_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_3")
+class L_0_4_1:
+    def __init__(self, L3_Key1:str, L3_Key2:list[int]):
+        self.L3_Key1 = L3_Key1
+        self.L3_Key2 = L3_Key2
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0_4_1: L3_Key1 = {{self.L3_Key1.__str__()}}, L3_Key2 = {{[x.__str__() for x in self.L3_Key2]}}'
+    def __repr__(self):
+        return f'L_0_4_1(L3_Key1={{repr(self.L3_Key1)}}, L3_Key2={{repr(self.L3_Key2)}})'
+    def to_dict(self)->dict:
+        return {{"L3_Key1": self.L3_Key1, "L3_Key2": self.L3_Key2}}
+    @classmethod
+    def from_dict(cls, data:dict)->'L_0_4_1':
+        if "L3_Key1" in data and "L3_Key2" in data:
+            return cls(data["L3_Key1"], data["L3_Key2"])
+        else:
+            raise KeyError("Invalid data for L_0_4_1")
+class L_0:
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1]):
+        self.L1_Key1 = L1_Key1
+        self.L1_Key2 = L1_Key2
+        self.L1_Key3 = L1_Key3
+        self.L1_Key4 = L1_Key4
+        self.L1_Key5 = L1_Key5
+    def __eq__(self, other):
+        return self.to_dict() == other
+    def __str__(self):
+        return f'L_0: L1_Key1 = {{self.L1_Key1.__str__()}}, L1_Key2 = {{[x.__str__() for x in self.L1_Key2]}}, L1_Key3 = {{[x.__str__() for x in self.L1_Key3]}}, L1_Key4 = {{self.L1_Key4.__str__()}}, L1_Key5 = {{[x.__str__() for x in self.L1_Key5]}}'
+    def __repr__(self):
+        return f'L_0(L1_Key1={{repr(self.L1_Key1)}}, L1_Key2={{repr(self.L1_Key2)}}, L1_Key3={{repr(self.L1_Key3)}}, L1_Key4={{repr(self.L1_Key4)}}, L1_Key5={{repr(self.L1_Key5)}})'
+    def to_dict(self)->dict:
+        return {{"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}}
+    @classmethod
+    def from_dict(cls, data:dict)->'L_0':
+        if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
+            classlist_L1_Key5 = [L_0_4_1.from_dict(classdata) for classdata in data.get("L1_Key5", [])]
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+        else:
+            raise KeyError("Invalid data for L_0")
+'''                
+        classes = find_classes(text)
+        inits = find_inits_for_classes(text, classes)
+        contexts = find_class_contexts(classes, inits)
+
+        expected = {'L_0_3':'L1_Key4', 'L_0_4_1':'L1_Key5'}
+
+        self.maxDiff = None
+        self.assertEqual(contexts, expected)               
 
 if __name__ == '__main__':
     unittest.main()

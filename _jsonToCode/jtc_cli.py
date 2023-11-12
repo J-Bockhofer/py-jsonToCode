@@ -8,50 +8,6 @@ def main():
     print("     jsonToCode CLI      ")
     cli_choose_mode()
 
-def cli_json_to_code():
-    jsonpath = user_get_jsonpath()
-    encoding = user_get_encoding()
-    pathq = "Enter the full filename for the resulting code (.py!)"
-    codepath = user_get_codepath(pathq)
-    serdecode = jtc.json_to_code(jsonpath, codepath, encoding)
-    print(f'Code generated @{codepath}')
-    question = 'Do you wish to generate a test for the serializer?'
-    genyn = user_yn(question)
-    if genyn == 'y':
-        testcode, testfile = jtc.generate_test(jsonpath, codepath, encoding)
-    question = 'Do you wish to rename the classes of the serializer?'
-    renameyn = user_yn(question)
-    while renameyn == 'y':
-        serdecode, newname, oldname = user_rename_class(serdecode)
-        if testcode:
-           testcode = jtc.replace_root_test(testcode,newname,oldname)
-        question = 'Keep renaming?'
-        renameyn = user_yn(question)
-    jtc.write_to_file(serdecode, codepath)
-    if testcode:
-        jtc.write_to_file(testcode, testfile)
-    
-def cli_rename_classes():
-    pathq = "Enter the full filename for the serializer:"
-    codepath = user_get_codepath(pathq)
-    serdecode = jtc.text_from_file(codepath)
-    question = 'Is there an associated test?'
-    testyn = user_yn(question)
-    if testyn == 'y':
-        pathq = "Enter the full filename for the serializer test:"
-        testpath = user_get_codepath(pathq)
-        testcode = jtc.text_from_file(testpath)
-    renameyn = 'y'
-    while renameyn == 'y':
-        serdecode, newname, oldname = user_rename_class(serdecode)
-        if testcode:
-           testcode = jtc.replace_root_test(testcode,newname,oldname)
-        question = 'Keep renaming?'
-        renameyn = user_yn(question)
-    jtc.write_to_file(serdecode, codepath)
-    if testcode:
-        jtc.write_to_file(testcode, testpath)  
-
 def cli_choose_mode():
     gensymb = ['0','g']
     rensymb =['1','r']
@@ -67,12 +23,81 @@ def cli_choose_mode():
     else:
         cli_choose_mode()
 
+def cli_json_to_code():
+    jsonpath = user_get_jsonpath()
+    encoding = user_get_encoding()
+    pathq = "Enter the full filename for the resulting code (.py!)"
+    codepath = user_get_codepath(pathq)
+    serdecode = jtc.json_to_code(jsonpath, codepath, encoding)
+    print(f'Code generated @{codepath}')
+    question = 'Do you wish to generate a test for the serializer?'
+    genyn = user_yn(question)
+    if genyn == 'y':
+        testcode, testfile = jtc.generate_test(jsonpath, codepath, encoding)
+    question = 'Automatically rename the classes of the serializer?'
+    autorename = user_yn(question)
+    if autorename == 'y':
+        res = jtc.auto_rename(serdecode, testcode)
+        serdecode = res['code']
+        testcode = res['test']
+
+    question = 'Do you wish to manually rename the classes of the serializer?'
+    renameyn = user_yn(question)
+
+    while renameyn == 'y':
+        serdecode, newname, oldname = user_rename_class(serdecode)
+        if testcode:
+            testcode = jtc.replace_root_test(testcode,newname,oldname)
+        question = 'Keep renaming?'
+        renameyn = user_yn(question)
+
+    jtc.write_to_file(serdecode, codepath)
+    if testcode:
+        jtc.write_to_file(testcode, testfile)
+    
+def cli_rename_classes():
+    pathq = "Enter the full filename for the serializer:"
+    codepath = user_get_codepath(pathq)
+    serdecode = jtc.text_from_file(codepath)
+    question = 'Is there an associated test?'
+    testyn = user_yn(question)
+    if testyn == 'y':
+        pathq = "Enter the full filename for the serializer test:"
+        testpath = user_get_codepath(pathq)
+        testcode = jtc.text_from_file(testpath)
+    renameyn = 'y'
+    question = 'Automatically rename the classes of the serializer?'
+    autorename = user_yn(question)
+    if autorename == 'y':
+        res = jtc.auto_rename(serdecode, testcode)
+        serdecode = res['code']
+        testcode = res['test']
+        question = 'Manually rename?'
+        renameyn = user_yn(question)  
+    while renameyn == 'y':
+        serdecode, newname, oldname = user_rename_class(serdecode)
+        if testcode:
+           testcode = jtc.replace_root_test(testcode,newname,oldname)
+        question = 'Keep renaming?'
+        renameyn = user_yn(question)
+    jtc.write_to_file(serdecode, codepath)
+    if testcode:
+        jtc.write_to_file(testcode, testpath)  
+
 def cli_quick_rename(codepath:str, testpath:str=''):
     readline.parse_and_bind('tab: complete')
     serdecode = jtc.text_from_file(codepath)
     if testpath:
         testcode = jtc.text_from_file(testpath)
     renameyn = 'y'
+    question = 'Automatically rename the classes of the serializer?'
+    autorename = user_yn(question)
+    if autorename == 'y':
+        res = jtc.auto_rename(serdecode, testcode)
+        serdecode = res['code']
+        testcode = res['test']
+        question = 'Manually rename?'
+        renameyn = user_yn(question)
     while renameyn == 'y':
         serdecode, newname, oldname = user_rename_class(serdecode)
         if testcode:
@@ -82,6 +107,7 @@ def cli_quick_rename(codepath:str, testpath:str=''):
     jtc.write_to_file(serdecode, codepath)
     if testcode:
         jtc.write_to_file(testcode, testpath)     
+ 
 
 def user_get_jsonpath() -> str:
     print("Enter the full filename for the JSON file:")

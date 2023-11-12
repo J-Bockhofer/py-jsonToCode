@@ -58,6 +58,21 @@ def make_str_block(classname:str, safekeys:list[str], types:list[str])->CodeBloc
 
     return CodeBlock(strhead, [strbody])
 
+def make_repr_block(classname:str, safekeys:list[str], types:list[str])->CodeBlock:
+    reprhead = 'def __repr__(self)'
+    reprbody = f'return f\'{classname}('
+    for i in range(0, len(safekeys)):
+        safekey = safekeys[i]
+        safekeystr = f'self.{safekey}'
+        reprbodytmp = f'{safekey}={{repr({safekeystr})}}, ' # triple braces to get evaluated
+        #if 'list[' in types[i]:
+        #    reprbodytmp = f'{safekey}={{[repr(x) for x in {safekeystr}]}}, '
+        reprbody += reprbodytmp
+    reprbody = reprbody[:-2] # remove , and whitespace
+    reprbody += ")'"#.replace('\\\\', '')" # add )' to end class init and f-string
+
+    return CodeBlock(reprhead, [reprbody])
+
 def make_todict_block(inkeys:list[str], safekeys:list[str], types:list[str])->CodeBlock:
     """
         takes a list of original keys, safekeys and associated types \n
@@ -100,7 +115,7 @@ def make_fromdict_block(classname:str,
         a list with class strings for successfully decoded dicts \n
         generates the from_dict CodeBlock \n
     """
-    from_dict_head = f'def from_dict(cls, data:dict)'
+    from_dict_head = f'def from_dict(cls, data:dict)->\'{classname}\''
     from_dict_body_if = 'if ' # if object property1 in data and object property2 in data 
     from_dict_body_if_lists = []
     from_dict_body_ifbody_returnstr = 'return cls('
