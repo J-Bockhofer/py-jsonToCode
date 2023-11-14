@@ -58,32 +58,56 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
             lastdict = {}
             dictnum = 0
             #uniquedicts = 0
-
+            addlisttype = None
             for element in val:
                 elementtype = type(element)
+                
                 if elementtype == type({}):
                     dictnum += 1
                     # check the dict
                     
                     if lastdict:
                         if lastdict.keys() != element.keys(): # if dicts are not the same
+
                             classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
                             nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                             codeblocks += nthclassblocklist
-                            uniquedicts += 1
+                            
+                            if nthclassblocklist:
+                                #if len(lastdict.keys() - element.keys()) < len(lastdict.keys())/2:
+                                    # last dict is similar enough to be same
+                                    # who is bigger
+                                    #if len(lastdict.keys())>len(element.keys()):
+                                    #    addlisttype = f'[{lastdictcstr}, '
+                                    #else:
+                                    #    addlisttype = f'[{classstr}, '
+                                    #pass
+                                #else:
+                                addlisttype += f'{classstr}, '
+                                uniquedicts += 1
+                            else:
+                                addlisttype += f'dict, '
+                                uniquedicts += 1
+                            # need to check which properties are optional to remove them from strict checking and give them a default value
+                            
 
                     else:
+                        # this is the first dict discovered
                         classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
                         lastdict = element
+                        lastdictcstr = classstr
                         uniquedicts += 1
                         nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                         codeblocks += nthclassblocklist
                         if nthclassblocklist:
-                            addlisttype = f'[{classstr}]'
+                            addlisttype = f'[{classstr}, '
                         else:
-                            addlisttype = f'[dict]'
+                            addlisttype = f'[dict, '
                         
                 elementtypelist.append(elementtype)
+            if addlisttype:
+                addlisttype = addlisttype[:-2]
+                addlisttype += ']'
 
             typeset = set(elementtypelist)
 
@@ -94,7 +118,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
                     if uniquedicts == 1:
                         typestr += addlisttype            
                     else:
-                        typestr += f'[{elementtype.__name__}]'
+                        typestr += addlisttype
                 else:
                     typestr += f'[{elementtype.__name__}]'
 
@@ -246,12 +270,22 @@ def find_class_contexts(classnames:list[str], inits:list[str])->dict:
     classcontext = {}
     for i in range(0,len(inits)):
         init = inits[i]
-        properties = re.findall(r'(\w+:[A-Za-z\[\]\_0-9]+)', init)
+        # regex find properties with type
+        # (\w+:\w+[\[\]\w]+[, \w\]]+)[,|\)]
+        # in : def __init__(self, submissions:list[Submission, L_1_0_2], application_number:str, sponsor_name:str, openfda:Openfda, products:list[Product]):
+        # match 1: submissions:list[Submission, L_1_0_2] 2: application_number:str etc
+        # old regex, does not work for nested classes, but easier on the eyes
+        # (\w+:[\w\[\]]+)
+        properties = re.findall(r'(\w+:\w+[\[\]\w]+[, \w\]]+)[,|\)]', init)
         for p in properties:
+            numClass = 0 # for unequal nested dicts
             for classname in classnames:
                 if classname in p:            
-                    context = re.findall(r'(\w+):', p)[0]
+                    context = re.findall(r'(\w+):', p)[0] # finds match 1: submissions
+                    if numClass > 0: # will append the number of the nested class
+                        context += f'_{numClass}'
                     classcontext[classname] = context
+                    numClass += 1
     return classcontext
 
 def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:

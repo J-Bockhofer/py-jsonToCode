@@ -3,6 +3,8 @@ import jtc_core as jtc
 import os
 import readline
 
+import re
+
 def main():
     readline.parse_and_bind('tab: complete')
     print("     jsonToCode CLI      ")
@@ -31,25 +33,25 @@ def cli_json_to_code():
     serdecode = jtc.json_to_code(jsonpath, codepath, encoding)
     print(f'Code generated @{codepath}')
     question = 'Do you wish to generate a test for the serializer?'
-    genyn = user_yn(question)
+    genyn = user_yn(question, default='y')
     if genyn == 'y':
         testcode, testfile = jtc.generate_test(jsonpath, codepath, encoding)
     question = 'Automatically rename the classes of the serializer?'
-    autorename = user_yn(question)
+    autorename = user_yn(question, default='y')
     if autorename == 'y':
         res = jtc.auto_rename(serdecode, testcode)
         serdecode = res['code']
         testcode = res['test']
 
     question = 'Do you wish to manually rename the classes of the serializer?'
-    renameyn = user_yn(question)
+    renameyn = user_yn(question, default='n')
 
     while renameyn == 'y':
         serdecode, newname, oldname = user_rename_class(serdecode)
         if testcode:
             testcode = jtc.replace_root_test(testcode,newname,oldname)
         question = 'Keep renaming?'
-        renameyn = user_yn(question)
+        renameyn = user_yn(question, default='n')
 
     jtc.write_to_file(serdecode, codepath)
     if testcode:
@@ -67,19 +69,19 @@ def cli_rename_classes():
         testcode = jtc.text_from_file(testpath)
     renameyn = 'y'
     question = 'Automatically rename the classes of the serializer?'
-    autorename = user_yn(question)
+    autorename = user_yn(question, default='y')
     if autorename == 'y':
         res = jtc.auto_rename(serdecode, testcode)
         serdecode = res['code']
         testcode = res['test']
         question = 'Manually rename?'
-        renameyn = user_yn(question)  
+        renameyn = user_yn(question, default='n') 
     while renameyn == 'y':
         serdecode, newname, oldname = user_rename_class(serdecode)
         if testcode:
            testcode = jtc.replace_root_test(testcode,newname,oldname)
         question = 'Keep renaming?'
-        renameyn = user_yn(question)
+        renameyn = user_yn(question, default='n')
     jtc.write_to_file(serdecode, codepath)
     if testcode:
         jtc.write_to_file(testcode, testpath)  
@@ -91,23 +93,22 @@ def cli_quick_rename(codepath:str, testpath:str=''):
         testcode = jtc.text_from_file(testpath)
     renameyn = 'y'
     question = 'Automatically rename the classes of the serializer?'
-    autorename = user_yn(question)
+    autorename = user_yn(question, default='y')
     if autorename == 'y':
         res = jtc.auto_rename(serdecode, testcode)
         serdecode = res['code']
         testcode = res['test']
         question = 'Manually rename?'
-        renameyn = user_yn(question)
+        renameyn = user_yn(question, default='n')
     while renameyn == 'y':
         serdecode, newname, oldname = user_rename_class(serdecode)
         if testcode:
            testcode = jtc.replace_root_test(testcode,newname,oldname)
         question = 'Keep renaming?'
-        renameyn = user_yn(question)
+        renameyn = user_yn(question, default='n')
     jtc.write_to_file(serdecode, codepath)
     if testcode:
         jtc.write_to_file(testcode, testpath)     
- 
 
 def user_get_jsonpath() -> str:
     print("Enter the full filename for the JSON file:")
@@ -132,16 +133,24 @@ def user_get_encoding() -> str:
 
 def user_get_codepath(question) -> str:
     print(question)
-    codefile = input()
+    codefile = make_valid_ext(input(), '.py')
     path, file = os.path.split(os.path.abspath(codefile))
     if os.path.exists(path):
         return codefile
     else:
         print(f'Invalid path @{path}')
         codefile = user_get_codepath(question)
-        return codefile    
+        return codefile
 
-def user_yn(question:str) -> str:
+def make_valid_ext(file:str, ext:str)-> str:
+    if file.endswith(ext):
+        return file
+    else:
+        if file.endswith(re.findall(r'\.+[\w]+', file)[0]):
+            file = file.replace(re.findall(r'\.+[\w]+', file)[0],'')
+        return file + ext
+
+def user_yn(question:str, default:str='') -> str:
     anslist_y = ['y','Y','yes']
     anslist_n = ['n','N','no']
     print(question + '\nType y or n:')
@@ -152,8 +161,12 @@ def user_yn(question:str) -> str:
     elif ans in anslist_n:
         return 'n'
     else:
-        print("Enter yes or no ...")
-        ans = user_yn(question)
+        if default:
+            print(default)
+            ans = default
+        else:
+            print("Enter yes or no ...")
+            ans = user_yn(question)
         return ans
 
 def user_get_new_name(oldname:str)-> str:

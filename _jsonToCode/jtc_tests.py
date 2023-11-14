@@ -135,9 +135,9 @@ class L_0_4_2:
 class L_0:
     """
         L_0:
-        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict])
+        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1, L_0_4_2])
     """
-    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[dict]):
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1, L_0_4_2]):
         self.L1_Key1 = L1_Key1
         self.L1_Key2 = L1_Key2
         self.L1_Key3 = L1_Key3
@@ -150,11 +150,12 @@ class L_0:
     def __repr__(self):
         return f'L_0(L1_Key1={repr(self.L1_Key1)}, L1_Key2={repr(self.L1_Key2)}, L1_Key3={repr(self.L1_Key3)}, L1_Key4={repr(self.L1_Key4)}, L1_Key5={repr(self.L1_Key5)})'
     def to_dict(self)->dict:
-        return {"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": self.L1_Key5}
+        return {"L1_Key1": self.L1_Key1, "L1_Key2": self.L1_Key2, "L1_Key3": self.L1_Key3, "L1_Key4": self.L1_Key4.to_dict(), "L1_Key5": [x.to_dict() for x in self.L1_Key5]}
     @classmethod
     def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
-            classlist_L1_Key5 = data["L1_Key5"]
+            _classlist_L1_Key5 = ['L_0_4_1', 'L_0_4_2']
+            classlist_L1_Key5 = [eval(_class).from_dict(x) for _class in _classlist_L1_Key5 for x in data["L1_Key5"] if eval(_class).from_random().to_dict().keys() == x.keys()]
             return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
         else:
             raise KeyError("Invalid data for L_0")
@@ -166,7 +167,7 @@ class L_0:
         L1_Key2 = [random.randint(lowlim, uplim) for _ in range(lowlim, uplim)]
         L1_Key3 = [''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim)) for _ in range(lowlim, uplim)]
         L1_Key4 = L_0_3.from_random(seed, lowlim, uplim)
-        L1_Key5 = [{} for _ in range(lowlim, uplim)]
+        L1_Key5 = [eval(random.choice(['L_0_4_1', 'L_0_4_2'])).from_random(seed, lowlim, uplim) for _ in range(lowlim, uplim)]
         return cls(L1_Key1, L1_Key2, L1_Key3, L1_Key4, L1_Key5)
 '''
         fulltxt = ''

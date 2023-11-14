@@ -137,7 +137,14 @@ def make_fromdict_block(classname:str,
                 from_dict_body_ifbody_returnstr_tmp = f'classlist_{inkeys[i]}, '
                 from_dict_body_elsebody_tmp = f'{classname}'   
             else:
-                from_dict_body_if_lists.append(f'classlist_{inkeys[i]} = data["{inkeys[i]}"]')
+                # change this here for heterogenous list of classes
+                # need to get all classnames from list
+                listtype = re.findall(r'\[(.*)\]', types[i])[0]
+                listtypes = listtype.replace(' ','').split(',')
+                # [[ eval(a).from_random(seed=seed) for a in al if seed == 0] for seed in seeds]
+                # do try eval(classname).from_dict(data) for classname in classnames for data in data["{inkeys[i]}"]
+                from_dict_body_if_lists.append(f'_classlist_{inkeys[i]} = {listtypes}')
+                from_dict_body_if_lists.append(f'classlist_{inkeys[i]} = [eval(_class).from_dict(x) for _class in _classlist_{inkeys[i]} for x in data["{inkeys[i]}"] if eval(_class).from_random().to_dict().keys() == x.keys()]')
                 from_dict_body_ifbody_returnstr_tmp = f'classlist_{inkeys[i]}, '                
         elif 'list[' in types[i]:
             # homogenous list of something
@@ -194,7 +201,7 @@ def make_fromrandom_block(classname:str, safekeys:list[str], types:list[str])->C
         if ctype == 'dict':
             from_rand_body.append(f'{cskey} = {{}}')
         if 'list' in ctype:
-            # its a typed list
+            # its a list
             liststrtmp = f'{cskey} = ['
             listtype = re.findall(r'\[(.*)\]', ctype)
             if listtype:
@@ -213,7 +220,13 @@ def make_fromrandom_block(classname:str, safekeys:list[str], types:list[str])->C
                 if listtype == 'dict':
                     liststrtmp += '{}' + _forliststr
                 if 'L_' in listtype:
-                    liststrtmp += f'{listtype}'+ randclassend +_forliststr
+                    if ',' in listtype:
+                        # non-uniform list of classes
+                        listtypes = listtype.replace(' ','').split(',')
+                        liststrtmp += f'eval(random.choice({listtypes}))'+ randclassend +_forliststr
+                        # eval(random.choice(listtypes))
+                    else:
+                        liststrtmp += f'{listtype}'+ randclassend +_forliststr
             else:
                 liststrtmp += ']'
             from_rand_body.append(liststrtmp)
