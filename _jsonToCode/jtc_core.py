@@ -8,6 +8,7 @@ import os
 
 import re
 
+import hashlib, base64
 
 def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=True) -> list[CodeBlock]:
     """
@@ -69,7 +70,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
                     if lastdict:
                         if lastdict.keys() != element.keys(): # if dicts are not the same
 
-                            classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
+                            classstr = classname + f'_{keynum}_{dictnum}'
                             nthclassblocklist = decode_layer(element, classname=classstr, layerdepth=layerdepth+1)
                             codeblocks += nthclassblocklist
                             
@@ -93,7 +94,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
 
                     else:
                         # this is the first dict discovered
-                        classstr = f'L_{layerdepth}_{keynum}_{dictnum}'
+                        classstr = classname + f'_{keynum}_{dictnum}'
                         lastdict = element
                         lastdictcstr = classstr
                         uniquedicts += 1
@@ -126,7 +127,7 @@ def decode_layer(data:dict, classname:str='', layerdepth:int=0, randomizer:bool=
 
         # if theres a dict decode that dict with layerdepth + 1
         if valtype == type({}):
-            typestr = f'L_{layerdepth}_{keynum}'
+            typestr = classname + f'_{keynum}_'
             nthclassblocklist = decode_layer(val, classname=typestr, layerdepth=layerdepth+1)
             codeblocks += nthclassblocklist
             if nthclassblocklist:
@@ -266,8 +267,15 @@ def find_inits_for_classes(text:str, class_names:list[str]) ->list[str]:
 
 def find_class_contexts(classnames:list[str], inits:list[str])->dict:
     # only non-root class contexts, root is always classnames[0]
+    allnames = classnames
     classnames = classnames[1:]
+    # reverse lists to give top level definitions priority
+    allnames.reverse()
+    classnames.reverse()
+    inits.reverse()
+
     classcontext = {}
+    usedcontexts = {}
     for i in range(0,len(inits)):
         init = inits[i]
         # regex find properties with type
@@ -282,10 +290,28 @@ def find_class_contexts(classnames:list[str], inits:list[str])->dict:
             for classname in classnames:
                 if classname in p:            
                     context = re.findall(r'(\w+):', p)[0] # finds match 1: submissions
+                    context = context.capitalize()
+                    if context[-1] == 's': # remove trailing s
+                        context = context[:-1]
+                        if context[-2:] == 'ie': # convert english plural to singular
+                            context = context[:-2] + 'y'
                     if numClass > 0: # will append the number of the nested class
                         context += f'_{numClass}'
+                    if context in usedcontexts.keys():
+                        # context already in use
+                        usedcontexts[context] += 1
+                        #_classinit = inits[classnames.index(classname)].replace('def __init__(self, ', '')
+                        #_hasher = hashlib.sha1(_classinit.encode('utf-8'))
+                        #_hash = re.sub(r'[^\w]', '', base64.urlsafe_b64encode(_hasher.digest()[:5]).decode('ascii'))
+                        context = f'{allnames[i]}_' + context
+                    else:
+                        usedcontexts[context] = 1
                     classcontext[classname] = context
                     numClass += 1
+    # is this how memory works? bc it was reversed outside of this function.. seems so
+    allnames.reverse()
+    classnames.reverse()
+    inits.reverse()                    
     return classcontext
 
 def replace_root_test(testcode:str, newName:str, oldname:str='') -> str:
@@ -303,16 +329,14 @@ def auto_rename(code:str, testcode:str='')->dict:
     contexts = find_class_contexts(classnames, inits)
     contexts[classnames[0]] = 'Root'
 
-    for classname in contexts.keys():
-        context = contexts[classname].capitalize()
-        if context[-1] == 's': # remove trailing s
-            context = context[:-1]
-            if context[-2:] == 'ie': # convert english plural to singular
-                context = context[:-2] + 'y'
-
+    desc_keylist = list(contexts.keys())
+    desc_keylist.sort(reverse=True)
+    for classname in desc_keylist:
+        context = contexts[classname]
         code = rename_class(classname, context, code)
         if testcode:
             testcode = rename_class(classname, context, testcode)
+
 
     return {'code':code, 'test':testcode}
 

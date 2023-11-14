@@ -45,9 +45,9 @@ def print_success(x):
         result = decode_layer(sampleDict)
 
         expected = '''\
-class L_0_3:
+class L_0_3_:
     """
-        L_0_3:
+        L_0_3_:
         def __init__(self, L2_Key1:str, L2_Key2:list[int])
     """
     def __init__(self, L2_Key1:str, L2_Key2:list[int]):
@@ -56,19 +56,19 @@ class L_0_3:
     def __eq__(self, other):
         return self.to_dict() == other
     def __str__(self):
-        return f'L_0_3: L2_Key1 = {self.L2_Key1.__str__()}, L2_Key2 = {[x.__str__() for x in self.L2_Key2]}'
+        return f'L_0_3_: L2_Key1 = {self.L2_Key1.__str__()}, L2_Key2 = {[x.__str__() for x in self.L2_Key2]}'
     def __repr__(self):
-        return f'L_0_3(L2_Key1={repr(self.L2_Key1)}, L2_Key2={repr(self.L2_Key2)})'
+        return f'L_0_3_(L2_Key1={repr(self.L2_Key1)}, L2_Key2={repr(self.L2_Key2)})'
     def to_dict(self)->dict:
         return {"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}
     @classmethod
-    def from_dict(cls, data:dict)->'L_0_3':
+    def from_dict(cls, data:dict)->'L_0_3_':
         if "L2_Key1" in data and "L2_Key2" in data:
             return cls(data["L2_Key1"], data["L2_Key2"])
         else:
-            raise KeyError("Invalid data for L_0_3")
+            raise KeyError("Invalid data for L_0_3_")
     @classmethod
-    def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'L_0_3':
+    def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'L_0_3_':
         if seed:
             random.seed(seed)
         L2_Key1 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))
@@ -135,9 +135,9 @@ class L_0_4_2:
 class L_0:
     """
         L_0:
-        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1, L_0_4_2])
+        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3_, L1_Key5:list[L_0_4_1, L_0_4_2])
     """
-    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1, L_0_4_2]):
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3_, L1_Key5:list[L_0_4_1, L_0_4_2]):
         self.L1_Key1 = L1_Key1
         self.L1_Key2 = L1_Key2
         self.L1_Key3 = L1_Key3
@@ -156,7 +156,7 @@ class L_0:
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
             _classlist_L1_Key5 = ['L_0_4_1', 'L_0_4_2']
             classlist_L1_Key5 = [eval(_class).from_dict(x) for _class in _classlist_L1_Key5 for x in data["L1_Key5"] if eval(_class).from_random().to_dict().keys() == x.keys()]
-            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3_.from_dict(data["L1_Key4"]), classlist_L1_Key5)
         else:
             raise KeyError("Invalid data for L_0")
     @classmethod
@@ -166,7 +166,7 @@ class L_0:
         L1_Key1 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))
         L1_Key2 = [random.randint(lowlim, uplim) for _ in range(lowlim, uplim)]
         L1_Key3 = [''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim)) for _ in range(lowlim, uplim)]
-        L1_Key4 = L_0_3.from_random(seed, lowlim, uplim)
+        L1_Key4 = L_0_3_.from_random(seed, lowlim, uplim)
         L1_Key5 = [eval(random.choice(['L_0_4_1', 'L_0_4_2'])).from_random(seed, lowlim, uplim) for _ in range(lowlim, uplim)]
         return cls(L1_Key1, L1_Key2, L1_Key3, L1_Key4, L1_Key5)
 '''
@@ -188,9 +188,9 @@ class L_0:
         result = decode_layer(sampleDict)
 
         expected = '''\
-class L_0_3:
+class L_0_3_:
     """
-        L_0_3:
+        L_0_3_:
         def __init__(self, L2_Key1:str, L2_Key2:list[int])
     """
     def __init__(self, L2_Key1:str, L2_Key2:list[int]):
@@ -199,19 +199,19 @@ class L_0_3:
     def __eq__(self, other):
         return self.to_dict() == other
     def __str__(self):
-        return f'L_0_3: L2_Key1 = {self.L2_Key1.__str__()}, L2_Key2 = {[x.__str__() for x in self.L2_Key2]}'
+        return f'L_0_3_: L2_Key1 = {self.L2_Key1.__str__()}, L2_Key2 = {[x.__str__() for x in self.L2_Key2]}'
     def __repr__(self):
-        return f'L_0_3(L2_Key1={repr(self.L2_Key1)}, L2_Key2={repr(self.L2_Key2)})'
+        return f'L_0_3_(L2_Key1={repr(self.L2_Key1)}, L2_Key2={repr(self.L2_Key2)})'
     def to_dict(self)->dict:
         return {"L2_Key1": self.L2_Key1, "L2_Key2": self.L2_Key2}
     @classmethod
-    def from_dict(cls, data:dict)->'L_0_3':
+    def from_dict(cls, data:dict)->'L_0_3_':
         if "L2_Key1" in data and "L2_Key2" in data:
             return cls(data["L2_Key1"], data["L2_Key2"])
         else:
-            raise KeyError("Invalid data for L_0_3")
+            raise KeyError("Invalid data for L_0_3_")
     @classmethod
-    def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'L_0_3':
+    def from_random(cls, seed:int=None, lowlim:int=1, uplim:int=10)->'L_0_3_':
         if seed:
             random.seed(seed)
         L2_Key1 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))
@@ -249,9 +249,9 @@ class L_0_4_1:
 class L_0:
     """
         L_0:
-        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1])
+        def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3_, L1_Key5:list[L_0_4_1])
     """
-    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3, L1_Key5:list[L_0_4_1]):
+    def __init__(self, L1_Key1:str, L1_Key2:list[int], L1_Key3:list[str], L1_Key4:L_0_3_, L1_Key5:list[L_0_4_1]):
         self.L1_Key1 = L1_Key1
         self.L1_Key2 = L1_Key2
         self.L1_Key3 = L1_Key3
@@ -269,7 +269,7 @@ class L_0:
     def from_dict(cls, data:dict)->'L_0':
         if "L1_Key1" in data and "L1_Key2" in data and "L1_Key3" in data and "L1_Key4" in data and "L1_Key5" in data:
             classlist_L1_Key5 = [L_0_4_1.from_dict(classdata) for classdata in data.get("L1_Key5", [])]
-            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3.from_dict(data["L1_Key4"]), classlist_L1_Key5)
+            return cls(data["L1_Key1"], data["L1_Key2"], data["L1_Key3"], L_0_3_.from_dict(data["L1_Key4"]), classlist_L1_Key5)
         else:
             raise KeyError("Invalid data for L_0")
     @classmethod
@@ -279,7 +279,7 @@ class L_0:
         L1_Key1 = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim))
         L1_Key2 = [random.randint(lowlim, uplim) for _ in range(lowlim, uplim)]
         L1_Key3 = [''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(lowlim, uplim)) for _ in range(lowlim, uplim)]
-        L1_Key4 = L_0_3.from_random(seed, lowlim, uplim)
+        L1_Key4 = L_0_3_.from_random(seed, lowlim, uplim)
         L1_Key5 = [L_0_4_1.from_random(seed, lowlim, uplim) for _ in range(lowlim, uplim)]
         return cls(L1_Key1, L1_Key2, L1_Key3, L1_Key4, L1_Key5)
 '''
@@ -588,7 +588,7 @@ class L_0:
         inits = find_inits_for_classes(text, classes)
         contexts = find_class_contexts(classes, inits)
 
-        expected = {'L_0_3':'L1_Key4', 'L_0_4_1':'L1_Key5'}
+        expected = {'L_0_3':'L1_key4', 'L_0_4_1':'L1_key5'} # key lowercase bc of .capitalize()
 
         self.maxDiff = None
         self.assertEqual(contexts, expected)               
